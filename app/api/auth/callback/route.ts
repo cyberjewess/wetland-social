@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOAuthClient } from '@/lib/atproto/oauth'
 import { setSession } from '@/lib/atproto/session'
-import { getProfile } from '@/lib/atproto/client'
 import { createLogger } from '@/lib/logger'
 
 const logger = createLogger({ service: 'auth-callback' })
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, state } = await request.json()
+    const { code, state, iss } = await request.json()
 
     if (!code) {
       return NextResponse.json(
@@ -17,16 +16,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    logger.info('Processing OAuth callback')
+    logger.info({ code: code.substring(0, 20), state, iss }, 'Processing OAuth callback')
 
     const client = await getOAuthClient()
 
-    // Build callback URL with code and state
+    // Build callback parameters with all query params from OAuth redirect
     const params = new URLSearchParams()
     params.set('code', code)
     if (state) {
       params.set('state', state)
     }
+    if (iss) {
+      params.set('iss', iss)
+    }
+
+    logger.info({ paramsString: params.toString() }, 'Calling OAuth callback')
 
     const result = await client.callback(params)
 
@@ -34,9 +38,15 @@ export async function POST(request: NextRequest) {
     const did = session.did
 
     // Fetch user profile to get handle using the authenticated session
+    // The OAuth session includes fetch() method that automatically adds auth headers
+    const profileResponse = await session.fetchHandler(
+      `https://bsky.social/xrpc/app.bsky.actor.getProfile?actor=${did}`,
+      { method: 'GET' }
+    )
+    const profileData = await profileResponse.json()
+    const handle = profileData.handle
+
     const tokenInfo = await session.getTokenInfo()
-    const profile = await getProfile(did)
-    const handle = profile.handle
 
     await setSession({
       did,
@@ -49,9 +59,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    logger.error({ error: err }, 'OAuth callback failed')
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    logger.error(
+      { error: errorMessage, stack: errorStack },
+      'OAuth callback failed'
+    )
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      { error: 'Authentication failed', details: errorMessage },
       { status: 500 }
     )
   }

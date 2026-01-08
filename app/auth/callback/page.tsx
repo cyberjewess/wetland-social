@@ -12,6 +12,7 @@ function CallbackContent() {
     const handleCallback = async () => {
       const code = searchParams.get('code')
       const state = searchParams.get('state')
+      const iss = searchParams.get('iss')
 
       if (!code) {
         setError('No authorization code received')
@@ -22,7 +23,7 @@ function CallbackContent() {
         const response = await fetch('/api/auth/callback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, state }),
+          body: JSON.stringify({ code, state, iss }),
         })
 
         if (!response.ok) {

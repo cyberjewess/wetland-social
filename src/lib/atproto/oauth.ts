@@ -7,35 +7,22 @@ import { JoseKey } from '@atproto/jwk-jose'
 import type { SimpleStore } from '@atproto-labs/simple-store'
 import fs from 'fs'
 import { createLogger } from '../logger'
+import { createFileStore } from './file-store'
 
 const logger = createLogger({ service: 'oauth' })
 
-// In-memory stores for development (use Redis/database for production)
-// SimpleStore interface requires get, set, del methods
-function createMemoryStore<
-  T extends NonNullable<unknown> | null,
->(): SimpleStore<string, T> {
-  const data = new Map<string, T>()
-  return {
-    get: async key => data.get(key),
-    set: async (key, value) => {
-      data.set(key, value)
-    },
-    del: async key => {
-      data.delete(key)
-    },
-  }
-}
-
+// File-based stores for development to survive Next.js hot reloads
+// Use Redis/database for production
 const stateStore: SimpleStore<string, NodeSavedState> =
-  createMemoryStore<NodeSavedState>()
+  createFileStore<NodeSavedState>('oauth-state')
 const sessionStore: SimpleStore<string, NodeSavedSession> =
-  createMemoryStore<NodeSavedSession>()
+  createFileStore<NodeSavedSession>('oauth-session')
 
 let oauthClient: NodeOAuthClient | null = null
 
 export async function getOAuthClient(): Promise<NodeOAuthClient> {
   if (oauthClient) {
+    logger.info('Reusing existing OAuth client')
     return oauthClient
   }
 
@@ -45,7 +32,7 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       throw new Error('OAUTH_PRIVATE_KEY_PATH not configured')
     }
 
-    logger.info({ privateKeyPath }, 'Loading OAuth private key')
+    logger.info({ privateKeyPath }, 'Creating new OAuth client - loading private key')
 
     const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8')
     const privateKey = await JoseKey.fromImportable(privateKeyPem, '1')
