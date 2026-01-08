@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  wetland-social:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: wetland-social-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Prevent node_modules and .next from being overwritten
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
