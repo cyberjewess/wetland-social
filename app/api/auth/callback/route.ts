@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    logger.info({ code: code.substring(0, 20), state, iss }, 'Processing OAuth callback')
+    logger.info(
+      { code: code.substring(0, 20), state, iss },
+      'Processing OAuth callback'
+    )
 
     const client = await getOAuthClient()
 

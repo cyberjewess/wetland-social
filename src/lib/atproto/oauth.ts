@@ -18,11 +18,11 @@ function createMemoryStore<
 >(): SimpleStore<string, T> {
   const data = new Map<string, T>()
   return {
-    get: async (key) => data.get(key),
+    get: async key => data.get(key),
     set: async (key, value) => {
       data.set(key, value)
     },
-    del: async (key) => {
+    del: async key => {
       data.delete(key)
     },
   }
@@ -47,7 +47,10 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       throw new Error('OAUTH_PRIVATE_KEY_PATH not configured')
     }
 
-    logger.info({ privateKeyPath }, 'Creating new OAuth client - loading private key')
+    logger.info(
+      { privateKeyPath },
+      'Creating new OAuth client - loading private key'
+    )
 
     const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8')
     const privateKey = await JoseKey.fromImportable(privateKeyPem, '1')
