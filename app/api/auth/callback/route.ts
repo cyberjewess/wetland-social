@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getOAuthClient } from '@/lib/atproto/oauth'
 import { setSession } from '@/lib/atproto/session'
+import { getProfile } from '@/lib/atproto/client'
 import { createLogger } from '@/lib/logger'
 
 const logger = createLogger({ service: 'auth-callback' })
@@ -21,7 +22,6 @@ export async function POST(request: NextRequest) {
     const client = await getOAuthClient()
 
     // Build callback URL with code
-    const url = new URL(request.url)
     const params = new URLSearchParams()
     params.set('code', code)
     params.set('state', request.nextUrl.searchParams.get('state') || '')
@@ -29,18 +29,21 @@ export async function POST(request: NextRequest) {
     const result = await client.callback(params)
 
     const { session } = result
+    const did = session.did
+
+    // Fetch user profile to get handle using the authenticated session
+    const tokenInfo = await session.getTokenInfo()
+    const profile = await getProfile(did)
+    const handle = profile.handle
 
     await setSession({
-      did: session.did,
-      handle: session.handle || '',
-      accessJwt: session.accessJwt,
-      refreshJwt: session.refreshJwt || '',
+      did,
+      handle,
+      accessJwt: tokenInfo.sub, // Store the DID as access identifier
+      refreshJwt: '', // OAuth client handles refresh automatically
     })
 
-    logger.info(
-      { did: session.did, handle: session.handle },
-      'User authenticated successfully'
-    )
+    logger.info({ did, handle }, 'User authenticated successfully')
 
     return NextResponse.json({ success: true })
   } catch (err) {
