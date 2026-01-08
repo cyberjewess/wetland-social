@@ -1,36 +1,235 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wetland Social
 
-## Getting Started
+A stratified social media app built on AT Protocol where posts have different visibility levels: Circle, Radius, Bioregion, and Global.
 
-First, run the development server:
+## Overview
+
+Wetland Social reimagines social media through stratified visibility layers. Instead of a single public/private binary, posts exist at different scales of community.
+
+**MVP Features**:
+- OAuth authentication with Bluesky accounts
+- Two posting levels: **Circle** (trusted groups) and **Global** (public)
+- Two distinct feeds demonstrating stratification
+- Text-only posts (max 300 graphemes)
+- Create up to 5 circles, bootstrap members from Bluesky social graph
+- Forest green theme with light/dark mode
+
+**Future**: Radius (geofence) and Bioregion (ecosystem) levels.
+
+## Quick Start
+
+### With Docker (Recommended)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Start development environment
+make dev
+
+# Run tests
+make test
+
+# View logs
+make logs
+
+# Stop containers
+make stop
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Without Docker
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Run development server
+npm run dev
 
-## Learn More
+# Run tests
+npm test
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
 
-## Deploy on Vercel
+2. Configure environment variables in `.env.local`:
+   ```env
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   OAUTH_CLIENT_ID=http://localhost:3000/client-metadata.json
+   OAUTH_PRIVATE_KEY_PATH=/path/to/private-key.pem
+   SESSION_SECRET=your-random-secret-key-here
+   NEXT_PUBLIC_PDS_URL=https://bsky.social
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Generate OAuth keys (for Phase 2):
+   ```bash
+   # Generate ES256 key pair
+   openssl ecparam -name prime256v1 -genkey -noout -out private-key.pem
+   openssl ec -in private-key.pem -pubout -out public-key.pem
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+wetland-social/
+├── src/
+│   ├── domain/                 # Pure business logic (unit testable)
+│   ├── lib/
+│   │   ├── atproto/           # AT Protocol infrastructure
+│   │   │   └── repositories/  # PDS communication
+│   │   ├── services/          # Application orchestration
+│   │   └── hooks/             # React Query hooks
+│   ├── components/            # React components
+│   └── types/                 # TypeScript types
+├── app/                       # Next.js App Router
+│   ├── api/                   # API routes
+│   └── (auth)/                # Authentication pages
+├── docs/
+│   ├── plans/                 # Implementation plans
+│   └── adrs/                  # Architecture Decision Records
+├── lexicons/                  # Custom AT Protocol lexicons
+├── public/                    # Static assets
+└── docker-compose.yml         # Docker configuration
+```
+
+## Architecture
+
+Wetland Social uses a **layered architecture** for testability:
+
+1. **Domain Layer** (`src/domain/`) - Pure business logic, no external dependencies
+2. **Infrastructure Layer** (`src/lib/atproto/`) - AT Protocol integration
+3. **Application Layer** (`src/lib/services/`) - Service orchestration
+4. **Presentation Layer** (`app/`, `src/components/`) - UI components
+
+See [ADR 001](docs/adrs/001-layered-architecture.md) for details.
+
+## Development Workflow
+
+See [AGENTS.md](AGENTS.md) for the complete development workflow.
+
+### Making Changes
+
+1. Create a feature branch:
+   ```bash
+   git checkout -b feat/description
+   ```
+
+2. Make changes and commit frequently (~3-4 files):
+   ```bash
+   git add .
+   git commit -m "Add feature description"
+   ```
+
+3. Push and create PR for review:
+   ```bash
+   git push origin feat/description
+   ```
+
+### Docker Commands
+
+```bash
+make dev      # Start development environment
+make build    # Build Docker images
+make prod     # Start production environment
+make stop     # Stop all containers
+make logs     # View container logs
+make test     # Run unit tests in Docker
+make clean    # Remove containers and volumes
+make help     # Show all commands
+```
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+**Testing Strategy**:
+- **Unit tests** for domain layer (pure logic, no mocks)
+- **Integration tests** for infrastructure (Phase 8)
+- **E2E tests** for critical flows (post-MVP)
+
+## Custom Lexicons
+
+Wetland Social extends AT Protocol with custom lexicons under `app.wland.*`:
+
+- **`app.wland.post`** - Posts with level metadata (global, circle)
+- **`app.wland.circle`** - Trusted groups of users
+- **`app.wland.defs`** - Shared type definitions
+
+See [docs/plans/mvp.md](docs/plans/mvp.md) for lexicon specifications.
+
+## API Endpoints
+
+- `GET /api/health` - Health check (returns `{ status: "ok" }`)
+- `POST /api/auth/[...atproto]` - OAuth authentication (Phase 2)
+
+## Observability & Logging
+
+Wetland Social implements comprehensive logging for debugging and tracing:
+
+- **Structured logs** with consistent format across all layers
+- **Request tracing** with correlation IDs
+- **Error context** includes stack traces and relevant state
+- **Performance metrics** for slow operations
+- **User action logs** for debugging user-reported issues
+
+All logs are output to stdout in development and can be viewed with `make logs`.
+
+## Deployment
+
+### Production with Docker
+
+1. Create `.env.production` with production values
+2. Deploy:
+   ```bash
+   make prod
+   ```
+
+3. Check health:
+   ```bash
+   curl http://localhost:3000/api/health
+   ```
+
+See [docs/plans/mvp.md](docs/plans/mvp.md#docker-configuration) for production setup details.
+
+## Tech Stack
+
+- **Next.js 15** - React framework with App Router
+- **TypeScript** - Type safety
+- **Tailwind CSS 4** - Styling with forest green theme
+- **AT Protocol** - Decentralized social protocol
+- **React Query** - Server state management
+- **Zod** - Schema validation
+- **Jest** - Unit testing
+- **Docker** - Containerization
+
+## Contributing
+
+1. Check [docs/plans/mvp.md](docs/plans/mvp.md) for current phase
+2. Follow workflow in [AGENTS.md](AGENTS.md)
+3. Keep PRs small (~200-500 lines)
+4. Write tests alongside domain logic
+5. Update documentation with code changes
+
+## License
+
+MIT
+
+## Links
+
+- **Domain**: [wland.app](https://wland.app)
+- **GitHub**: [github.com/cyberjewess/wetland-social](https://github.com/cyberjewess/wetland-social)
+- **AT Protocol**: [atproto.com](https://atproto.com)
+- **Bluesky**: [bsky.app](https://bsky.app)
