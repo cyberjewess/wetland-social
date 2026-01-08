@@ -12,15 +12,9 @@ function CallbackContent() {
     const handleCallback = async () => {
       const code = searchParams.get('code')
       const state = searchParams.get('state')
-      const savedState = sessionStorage.getItem('oauth_state')
 
       if (!code) {
         setError('No authorization code received')
-        return
-      }
-
-      if (state !== savedState) {
-        setError('Invalid state parameter')
         return
       }
 
@@ -28,18 +22,22 @@ function CallbackContent() {
         const response = await fetch('/api/auth/callback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code, state }),
         })
 
         if (!response.ok) {
-          throw new Error('Failed to complete authentication')
+          const data = await response.json()
+          throw new Error(data.error || 'Failed to complete authentication')
         }
 
-        sessionStorage.removeItem('oauth_state')
         router.push('/feed/global')
       } catch (err) {
         console.error('Authentication failed:', err)
-        setError('Authentication failed. Please try again.')
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Authentication failed. Please try again.'
+        )
       }
     }
 

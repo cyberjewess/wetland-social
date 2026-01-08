@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getAuthUrl } from '@/lib/atproto/oauth'
 import { createLogger } from '@/lib/logger'
 
 const logger = createLogger({ service: 'auth-api' })
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const state = searchParams.get('state') || ''
+    logger.info('Generating authorization URL')
 
-    logger.info({ state }, 'Generating authorization URL')
-
-    const url = await getAuthUrl(state)
+    const url = await getAuthUrl()
 
     return NextResponse.json({ url })
   } catch (err) {

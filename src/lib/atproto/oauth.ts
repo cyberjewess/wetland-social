@@ -98,13 +98,13 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
   }
 }
 
-export async function getAuthUrl(state: string): Promise<string> {
+export async function getAuthUrl(): Promise<string> {
   const client = await getOAuthClient()
+  // The OAuth library generates and manages state internally
   const url = await client.authorize('https://bsky.social', {
-    state,
     scope: 'atproto transition:generic',
   })
 
-  logger.info({ state }, 'Generated authorization URL')
+  logger.info('Generated authorization URL')
   return url.toString()
 }

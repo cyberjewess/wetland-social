@@ -8,7 +8,7 @@ const logger = createLogger({ service: 'auth-callback' })
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json()
+    const { code, state } = await request.json()
 
     if (!code) {
       return NextResponse.json(
@@ -21,10 +21,12 @@ export async function POST(request: NextRequest) {
 
     const client = await getOAuthClient()
 
-    // Build callback URL with code
+    // Build callback URL with code and state
     const params = new URLSearchParams()
     params.set('code', code)
-    params.set('state', request.nextUrl.searchParams.get('state') || '')
+    if (state) {
+      params.set('state', state)
+    }
 
     const result = await client.callback(params)
 

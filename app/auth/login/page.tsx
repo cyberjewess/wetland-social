@@ -14,12 +14,8 @@ export default function LoginPage() {
   const handleSignIn = async () => {
     setLoading(true)
     try {
-      // Generate random state for CSRF protection
-      const state = Math.random().toString(36).substring(7)
-      sessionStorage.setItem('oauth_state', state)
-
-      // Redirect to OAuth authorization
-      const response = await fetch(`/api/auth/authorize?state=${state}`)
+      // The OAuth library generates and manages state internally for CSRF protection
+      const response = await fetch('/api/auth/authorize')
       const { url } = await response.json()
 
       window.location.href = url
