@@ -78,8 +78,6 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       keyset: [privateKey],
       stateStore,
       sessionStore,
-      // Allow HTTP for local development (use HTTPS in production)
-      allowHttp: true,
       requestLock: async (_key, fn) => {
         // Simple in-memory lock for development
         // TODO: Use Redis or database for production
