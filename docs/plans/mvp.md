@@ -42,22 +42,27 @@
 
 ### MVP Scope
 
-- **Posting Levels**: Global + Circle only (Radius and Bioregion deferred)
+- **Posting Levels**: Circle only for MVP (Radius and Bioregion deferred)
 - **Posts**: Text-only, no media
 - **Auth**: AT Protocol PDS (Bluesky-style OAuth) - users sign in with existing Bluesky identities
 - **Feeds**: Two feeds to demonstrate stratification:
-  - **Circle Feed**: Shows your own posts in your circles + posts in any circles you're a member of
-  - **Global Feed**: Shows all global posts (your own + public posts from others)
-- **Features**: Create posts, manage circles (up to 5), view circle and global feeds
+  - **Circle Feed**: Custom `app.wland.post` records - your circle posts + posts from circles you're in
+  - **Global Feed**: Native Bluesky timeline - standard `app.bsky.feed.post` from your following list
+- **Features**: Create circle posts, manage circles (up to 5), view circle and Bluesky feeds
 - **No**: Likes, follows, reactions in MVP
 
-### Core Concept: The Four Levels
+### Core Concept: Bluesky + Stratified Layers
 
-From [README.md](README.md):
-1. **Circle** (MVP) - Trusted group of friends/followers (up to 5 circles per user, modifiable anytime)
-2. **Radius** (Future) - Geofence around physical location (modifiable once/day)
-3. **Bioregion** (Future) - Natural ecosystem regions (modifiable once/day)
-4. **Global** (MVP) - Traditional unrestricted visibility
+**Wetland is Bluesky + additional stratified posting**:
+1. **Global = Native Bluesky** (use existing `app.bsky.feed.post`, no custom lexicon needed)
+2. **Circle** (MVP) - Custom `app.wland.post` for trusted group posts (up to 5 circles, modifiable anytime)
+3. **Radius** (Future) - Custom `app.wland.post` with geofence metadata (modifiable once/day)
+4. **Bioregion** (Future) - Custom `app.wland.post` with bioregion metadata (modifiable once/day)
+
+This approach:
+- Maintains full Bluesky compatibility (global posts are native Bluesky posts)
+- Adds stratified layers on top via custom lexicons
+- Users can post to both Bluesky (global) and Wetland circles seamlessly
 
 ---
 
@@ -88,18 +93,17 @@ From [README.md](README.md):
 
 ## Custom Lexicon Design
 
-We need three custom lexicons under the NSID namespace `app.wland.*` (using your domain wland.app):
+We need **two** custom lexicons under the NSID namespace `app.wland.*` (using your domain wland.app):
 
 ### 1. Post Lexicon: `app.wland.post`
 
-**Purpose**: Extends the concept of `app.bsky.feed.post` with level metadata
+**Purpose**: Circle-level posts (NOT global - global uses native `app.bsky.feed.post`)
 
 **Record Structure**:
 ```typescript
 {
   text: string;              // Max 300 graphemes
-  level: "global" | "circle"; // Posting level
-  circleRef?: string;        // AT-URI to circle (required if level="circle")
+  circleRef: string;         // AT-URI to circle (required)
   createdAt: string;         // ISO datetime
   langs?: string[];          // Optional language codes
   facets?: Facet[];          // Rich text (mentions, links) - future
@@ -110,7 +114,8 @@ We need three custom lexicons under the NSID namespace `app.wland.*` (using your
 - Uses TID (Timestamp Identifier) as record key
 - Stored in user's repository at: `at://did:plc:{userDid}/app.wland.post/{tid}`
 - Each post record is **owned by the user who created it** (stored in their DID's repo)
-- Circle posts must reference a valid circle AT-URI from the same user's repo
+- **Always** references a circle (no "level" field - level is implicit by lexicon type)
+- For global posts, users create native `app.bsky.feed.post` records instead
 
 ### 2. Circle Lexicon: `app.wland.circle`
 
@@ -140,7 +145,10 @@ We need three custom lexicons under the NSID namespace `app.wland.*` (using your
 
 **Exports**:
 - `circleRef` - Reference to circle records (AT-URI + CID)
-- `postVisibility` - Enum for visibility levels
+
+**Note**: No `postVisibility` enum needed since posting level is determined by lexicon type:
+- `app.bsky.feed.post` = Global (Bluesky native)
+- `app.wland.post` = Circle (Wetland custom)
 
 ---
 
