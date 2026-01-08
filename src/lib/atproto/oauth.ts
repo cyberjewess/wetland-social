@@ -12,17 +12,16 @@ const logger = createLogger({ service: 'oauth' })
 
 // In-memory stores for development (use Redis/database for production)
 // SimpleStore interface requires get, set, del methods
-function createMemoryStore<T extends NonNullable<unknown> | null>(): SimpleStore<
-  string,
-  T
-> {
+function createMemoryStore<
+  T extends NonNullable<unknown> | null,
+>(): SimpleStore<string, T> {
   const data = new Map<string, T>()
   return {
-    get: async (key) => data.get(key),
+    get: async key => data.get(key),
     set: async (key, value) => {
       data.set(key, value)
     },
-    del: async (key) => {
+    del: async key => {
       data.delete(key)
     },
   }
