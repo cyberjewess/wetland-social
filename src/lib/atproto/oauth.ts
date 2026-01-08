@@ -76,6 +76,8 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       keyset: [privateKey],
       stateStore,
       sessionStore,
+      // Allow HTTP for local development (use HTTPS in production)
+      allowHttp: true,
       requestLock: async (_key, fn) => {
         // Simple in-memory lock for development
         // TODO: Use Redis or database for production
@@ -86,7 +88,12 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
     logger.info('OAuth client initialized successfully')
     return oauthClient
   } catch (err) {
-    logger.error({ error: err }, 'Failed to initialize OAuth client')
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    logger.error(
+      { error: errorMessage, stack: errorStack },
+      'Failed to initialize OAuth client'
+    )
     throw err
   }
 }

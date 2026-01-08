@@ -15,9 +15,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ url })
   } catch (err) {
-    logger.error({ error: err }, 'Failed to generate authorization URL')
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    logger.error(
+      { error: errorMessage, stack: errorStack },
+      'Failed to generate authorization URL'
+    )
     return NextResponse.json(
-      { error: 'Failed to start authentication' },
+      { error: 'Failed to start authentication', details: errorMessage },
       { status: 500 }
     )
   }
