@@ -4,20 +4,29 @@
 
 ### Phase Checklist
 
-- [x] **Phase 1**: Project Setup, Dependencies, & Docker (IN PROGRESS)
+- [x] **Phase 1**: Project Setup, Dependencies, & Docker (COMPLETED)
   - [x] Initialize Next.js 15 with TypeScript and App Router
   - [x] Install dependencies (atproto, React Query, Zod, Jest)
   - [x] Configure project (Tailwind forest green theme, Jest, Prettier)
   - [x] Create docs/ folder and ADR for layered architecture
   - [x] Copy plan to docs/plans/mvp.md
-  - [ ] Create Docker setup (Dockerfile, docker-compose, Makefile)
-  - [ ] Create health check endpoint at /api/health
-  - [ ] Create folder structure (domain/, lib/atproto/repositories/, lib/services/)
-  - [ ] Update README with setup instructions
-  - [ ] Test Docker setup with make dev
-  - [ ] Push Phase 1 to GitHub and create PR for review
+  - [x] Create Docker setup (Dockerfile, docker-compose, Makefile)
+  - [x] Create health check endpoint at /api/health
+  - [x] Create folder structure (domain/, lib/atproto/repositories/, lib/services/)
+  - [x] Update README with setup instructions
+  - [x] Organize OAuth keys in keys/ directory
+  - [x] Push Phase 1 to GitHub and create PR for review
 
-- [ ] **Phase 2**: OAuth Authentication with Bluesky
+- [x] **Phase 2**: OAuth Authentication with Bluesky (IN PROGRESS)
+  - [x] Generate JWKS and client metadata
+  - [x] Create OAuth client configuration
+  - [x] Create session management utilities
+  - [x] Build login page with "Sign in with Bluesky"
+  - [x] Build OAuth callback handler
+  - [x] Create API routes (authorize, callback, logout, me)
+  - [x] Build useAuth hook for auth state
+  - [ ] Test OAuth flow end-to-end
+  - [ ] Push Phase 2 to GitHub and create PR for review
 - [ ] **Phase 3**: Domain Layer & Lexicons
 - [ ] **Phase 4**: Circle Management (Infrastructure + UI)
 - [ ] **Phase 5**: Post Creation (Infrastructure + UI)
