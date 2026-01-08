@@ -428,6 +428,109 @@ This keeps PRs small and reviewable (~200-400 lines each).
 
 ---
 
+### Phase 1.5: Docker Compose + Redis for OAuth State
+**Branch**: `feat/phase-1.5-docker-redis`
+**Estimated files**: ~8
+**PR Size**: Medium (~300 lines)
+
+**Goal**: Add Docker Compose orchestration with Redis for persistent OAuth state storage
+
+**Why This Phase**: Phase 2 uses in-memory stores which lose OAuth state on Next.js hot reloads. Redis provides persistent storage that survives module reloads and is production-ready.
+
+#### Tasks
+
+1. **Docker Compose Configuration** - `docker-compose.yml`
+   ```yaml
+   version: '3.8'
+   services:
+     web:
+       build: .
+       ports:
+         - "3000:3000"
+       environment:
+         - REDIS_URL=redis://redis:6379
+       volumes:
+         - .:/app
+         - /app/node_modules
+       depends_on:
+         - redis
+       command: npm run dev
+
+     redis:
+       image: redis:7-alpine
+       ports:
+         - "6379:6379"
+       volumes:
+         - redis_data:/data
+
+   volumes:
+     redis_data:
+   ```
+
+2. **Redis Store Implementation** - [src/lib/atproto/redis-store.ts](src/lib/atproto/redis-store.ts)
+   - Install `ioredis` package
+   - Implement `SimpleStore<string, T>` interface using Redis
+   - Handle serialization/deserialization for OAuth state/session
+   - Add connection pooling and error handling
+
+3. **Update OAuth Configuration** - [src/lib/atproto/oauth.ts](src/lib/atproto/oauth.ts)
+   - Replace `createMemoryStore()` with Redis store when `REDIS_URL` is set
+   - Keep in-memory fallback for environments without Redis
+   - Update comments to reflect Redis as production solution
+
+4. **Makefile Updates**
+   ```makefile
+   dev:
+   	docker-compose up
+
+   dev-redis:
+   	docker-compose up redis
+
+   test:
+   	docker-compose run web npm test
+   ```
+
+5. **Environment Configuration**
+   - Add `REDIS_URL` to `.env.example`
+   - Update `.env.local` to include `REDIS_URL=redis://localhost:6379`
+   - Document Redis connection string format
+
+6. **Health Check Enhancement** - [app/api/health/route.ts](app/api/health/route.ts)
+   - Add Redis connectivity check
+   - Return `{ status: "ok", redis: "connected" }` or error
+
+7. **Documentation Updates**
+   - Update [docs/local-development.md](docs/local-development.md) with Docker Compose instructions
+   - Document how to run with and without Docker
+   - Add Redis troubleshooting section
+   - Update README with `make dev` as primary dev command
+
+8. **.dockerignore** - Add patterns to speed up builds
+   ```
+   node_modules
+   .next
+   .git
+   *.md
+   ```
+
+**Deliverables**:
+- `docker-compose up` starts Next.js + Redis
+- OAuth state persists across hot reloads
+- Health check reports Redis status
+- Documented fallback to in-memory store without Redis
+
+**Testing**:
+1. Start with `docker-compose up`
+2. Verify Redis connection in health check
+3. Complete OAuth flow
+4. Trigger hot reload (edit a file)
+5. OAuth callback should still work (state persisted in Redis)
+6. Stop and restart containers - OAuth sessions should persist
+
+**PR Title**: `Phase 1.5: Add Docker Compose with Redis for OAuth persistence`
+
+---
+
 ### Phase 3: Domain Layer & Lexicons
 **Branch**: `feat/phase-3-domain`
 **Estimated files**: ~12
