@@ -4,20 +4,29 @@
 
 ### Phase Checklist
 
-- [x] **Phase 1**: Project Setup, Dependencies, & Docker (IN PROGRESS)
+- [x] **Phase 1**: Project Setup, Dependencies, & Docker (COMPLETED)
   - [x] Initialize Next.js 15 with TypeScript and App Router
   - [x] Install dependencies (atproto, React Query, Zod, Jest)
   - [x] Configure project (Tailwind forest green theme, Jest, Prettier)
   - [x] Create docs/ folder and ADR for layered architecture
   - [x] Copy plan to docs/plans/mvp.md
-  - [ ] Create Docker setup (Dockerfile, docker-compose, Makefile)
-  - [ ] Create health check endpoint at /api/health
-  - [ ] Create folder structure (domain/, lib/atproto/repositories/, lib/services/)
-  - [ ] Update README with setup instructions
-  - [ ] Test Docker setup with make dev
-  - [ ] Push Phase 1 to GitHub and create PR for review
+  - [x] Create Docker setup (Dockerfile, docker-compose, Makefile)
+  - [x] Create health check endpoint at /api/health
+  - [x] Create folder structure (domain/, lib/atproto/repositories/, lib/services/)
+  - [x] Update README with setup instructions
+  - [x] Organize OAuth keys in keys/ directory
+  - [x] Push Phase 1 to GitHub and create PR for review
 
-- [ ] **Phase 2**: OAuth Authentication with Bluesky
+- [x] **Phase 2**: OAuth Authentication with Bluesky (IN PROGRESS)
+  - [x] Generate JWKS and client metadata
+  - [x] Create OAuth client configuration
+  - [x] Create session management utilities
+  - [x] Build login page with "Sign in with Bluesky"
+  - [x] Build OAuth callback handler
+  - [x] Create API routes (authorize, callback, logout, me)
+  - [x] Build useAuth hook for auth state
+  - [ ] Test OAuth flow end-to-end
+  - [ ] Push Phase 2 to GitHub and create PR for review
 - [ ] **Phase 3**: Domain Layer & Lexicons
 - [ ] **Phase 4**: Circle Management (Infrastructure + UI)
 - [ ] **Phase 5**: Post Creation (Infrastructure + UI)
@@ -33,22 +42,27 @@
 
 ### MVP Scope
 
-- **Posting Levels**: Global + Circle only (Radius and Bioregion deferred)
+- **Posting Levels**: Circle only for MVP (Radius and Bioregion deferred)
 - **Posts**: Text-only, no media
 - **Auth**: AT Protocol PDS (Bluesky-style OAuth) - users sign in with existing Bluesky identities
 - **Feeds**: Two feeds to demonstrate stratification:
-  - **Circle Feed**: Shows your own posts in your circles + posts in any circles you're a member of
-  - **Global Feed**: Shows all global posts (your own + public posts from others)
-- **Features**: Create posts, manage circles (up to 5), view circle and global feeds
+  - **Circle Feed**: Custom `app.wland.post` records - your circle posts + posts from circles you're in
+  - **Global Feed**: Native Bluesky timeline - standard `app.bsky.feed.post` from your following list
+- **Features**: Create circle posts, manage circles (up to 5), view circle and Bluesky feeds
 - **No**: Likes, follows, reactions in MVP
 
-### Core Concept: The Four Levels
+### Core Concept: Bluesky + Stratified Layers
 
-From [README.md](README.md):
-1. **Circle** (MVP) - Trusted group of friends/followers (up to 5 circles per user, modifiable anytime)
-2. **Radius** (Future) - Geofence around physical location (modifiable once/day)
-3. **Bioregion** (Future) - Natural ecosystem regions (modifiable once/day)
-4. **Global** (MVP) - Traditional unrestricted visibility
+**Wetland is Bluesky + additional stratified posting**:
+1. **Global = Native Bluesky** (use existing `app.bsky.feed.post`, no custom lexicon needed)
+2. **Circle** (MVP) - Custom `app.wland.post` for trusted group posts (up to 5 circles, modifiable anytime)
+3. **Radius** (Future) - Custom `app.wland.post` with geofence metadata (modifiable once/day)
+4. **Bioregion** (Future) - Custom `app.wland.post` with bioregion metadata (modifiable once/day)
+
+This approach:
+- Maintains full Bluesky compatibility (global posts are native Bluesky posts)
+- Adds stratified layers on top via custom lexicons
+- Users can post to both Bluesky (global) and Wetland circles seamlessly
 
 ---
 
@@ -79,18 +93,17 @@ From [README.md](README.md):
 
 ## Custom Lexicon Design
 
-We need three custom lexicons under the NSID namespace `app.wland.*` (using your domain wland.app):
+We need **two** custom lexicons under the NSID namespace `app.wland.*` (using your domain wland.app):
 
 ### 1. Post Lexicon: `app.wland.post`
 
-**Purpose**: Extends the concept of `app.bsky.feed.post` with level metadata
+**Purpose**: Circle-level posts (NOT global - global uses native `app.bsky.feed.post`)
 
 **Record Structure**:
 ```typescript
 {
   text: string;              // Max 300 graphemes
-  level: "global" | "circle"; // Posting level
-  circleRef?: string;        // AT-URI to circle (required if level="circle")
+  circleRef: string;         // AT-URI to circle (required)
   createdAt: string;         // ISO datetime
   langs?: string[];          // Optional language codes
   facets?: Facet[];          // Rich text (mentions, links) - future
@@ -101,7 +114,8 @@ We need three custom lexicons under the NSID namespace `app.wland.*` (using your
 - Uses TID (Timestamp Identifier) as record key
 - Stored in user's repository at: `at://did:plc:{userDid}/app.wland.post/{tid}`
 - Each post record is **owned by the user who created it** (stored in their DID's repo)
-- Circle posts must reference a valid circle AT-URI from the same user's repo
+- **Always** references a circle (no "level" field - level is implicit by lexicon type)
+- For global posts, users create native `app.bsky.feed.post` records instead
 
 ### 2. Circle Lexicon: `app.wland.circle`
 
@@ -131,7 +145,10 @@ We need three custom lexicons under the NSID namespace `app.wland.*` (using your
 
 **Exports**:
 - `circleRef` - Reference to circle records (AT-URI + CID)
-- `postVisibility` - Enum for visibility levels
+
+**Note**: No `postVisibility` enum needed since posting level is determined by lexicon type:
+- `app.bsky.feed.post` = Global (Bluesky native)
+- `app.wland.post` = Circle (Wetland custom)
 
 ---
 
@@ -408,6 +425,109 @@ This keeps PRs small and reviewable (~200-400 lines each).
 - Sign out clears session
 
 **PR Title**: `Phase 2: OAuth authentication with Bluesky PDS`
+
+---
+
+### Phase 1.5: Docker Compose + Redis for OAuth State
+**Branch**: `feat/phase-1.5-docker-redis`
+**Estimated files**: ~8
+**PR Size**: Medium (~300 lines)
+
+**Goal**: Add Docker Compose orchestration with Redis for persistent OAuth state storage
+
+**Why This Phase**: Phase 2 uses in-memory stores which lose OAuth state on Next.js hot reloads. Redis provides persistent storage that survives module reloads and is production-ready.
+
+#### Tasks
+
+1. **Docker Compose Configuration** - `docker-compose.yml`
+   ```yaml
+   version: '3.8'
+   services:
+     web:
+       build: .
+       ports:
+         - "3000:3000"
+       environment:
+         - REDIS_URL=redis://redis:6379
+       volumes:
+         - .:/app
+         - /app/node_modules
+       depends_on:
+         - redis
+       command: npm run dev
+
+     redis:
+       image: redis:7-alpine
+       ports:
+         - "6379:6379"
+       volumes:
+         - redis_data:/data
+
+   volumes:
+     redis_data:
+   ```
+
+2. **Redis Store Implementation** - [src/lib/atproto/redis-store.ts](src/lib/atproto/redis-store.ts)
+   - Install `ioredis` package
+   - Implement `SimpleStore<string, T>` interface using Redis
+   - Handle serialization/deserialization for OAuth state/session
+   - Add connection pooling and error handling
+
+3. **Update OAuth Configuration** - [src/lib/atproto/oauth.ts](src/lib/atproto/oauth.ts)
+   - Replace `createMemoryStore()` with Redis store when `REDIS_URL` is set
+   - Keep in-memory fallback for environments without Redis
+   - Update comments to reflect Redis as production solution
+
+4. **Makefile Updates**
+   ```makefile
+   dev:
+   	docker-compose up
+
+   dev-redis:
+   	docker-compose up redis
+
+   test:
+   	docker-compose run web npm test
+   ```
+
+5. **Environment Configuration**
+   - Add `REDIS_URL` to `.env.example`
+   - Update `.env.local` to include `REDIS_URL=redis://localhost:6379`
+   - Document Redis connection string format
+
+6. **Health Check Enhancement** - [app/api/health/route.ts](app/api/health/route.ts)
+   - Add Redis connectivity check
+   - Return `{ status: "ok", redis: "connected" }` or error
+
+7. **Documentation Updates**
+   - Update [docs/local-development.md](docs/local-development.md) with Docker Compose instructions
+   - Document how to run with and without Docker
+   - Add Redis troubleshooting section
+   - Update README with `make dev` as primary dev command
+
+8. **.dockerignore** - Add patterns to speed up builds
+   ```
+   node_modules
+   .next
+   .git
+   *.md
+   ```
+
+**Deliverables**:
+- `docker-compose up` starts Next.js + Redis
+- OAuth state persists across hot reloads
+- Health check reports Redis status
+- Documented fallback to in-memory store without Redis
+
+**Testing**:
+1. Start with `docker-compose up`
+2. Verify Redis connection in health check
+3. Complete OAuth flow
+4. Trigger hot reload (edit a file)
+5. OAuth callback should still work (state persisted in Redis)
+6. Stop and restart containers - OAuth sessions should persist
+
+**PR Title**: `Phase 1.5: Add Docker Compose with Redis for OAuth persistence`
 
 ---
 

@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build outputs
+.next
+out
+dist
+build
+
+# Coverage
+coverage
+
+# Misc
+.DS_Store
+*.pem
+
+# Keys
+keys/*.pem
+
+# Env files
+.env*
+!.env.example

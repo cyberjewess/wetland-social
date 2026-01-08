@@ -23,14 +23,18 @@ export const logger = pino({
  * const serviceLogger = createLogger({ service: 'circle-service' })
  * serviceLogger.info({ circleId }, 'Circle created')
  */
-export const createLogger = (context: Record<string, any>) => {
+export const createLogger = (context: Record<string, string>) => {
+  // Note from dev: changed context from Record<string, any> to Record<string, string>
+  // to fix lint errors. Will need to use specific type in future
   return logger.child(context)
 }
 
 /**
  * Redact sensitive data from logs
  */
-export const redactSensitive = (data: Record<string, any>) => {
+export const redactSensitive = (data: Record<string, string>) => {
+  // Note from dev: changed data from Record<string, any> to Record<string, string>
+  // to fix lint errors. Will need to use specific type in future
   const redacted = { ...data }
 
   // Redact tokens
