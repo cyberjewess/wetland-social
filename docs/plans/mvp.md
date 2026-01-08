@@ -470,9 +470,11 @@ This keeps PRs small and reviewable (~200-400 lines each).
    - `updateCircle(uri: string, circle: Circle)` - Update record
    - `deleteCircle(uri: string)` - Delete record
 
-2. **Infrastructure: Social Graph** - [src/lib/atproto/repositories/graphRepository.ts](src/lib/atproto/repositories/graphRepository.ts)
+2. **Infrastructure: Social Graph & Identity** - [src/lib/atproto/repositories/graphRepository.ts](src/lib/atproto/repositories/graphRepository.ts)
    - `getFollowing(did: string)` - Fetch user's Bluesky following list
-   - Returns array of DIDs and handles for member selection
+   - Returns array of `{ did: string, handle: string, displayName?: string, avatar?: string }`
+   - `resolveHandle(handle: string)` - Resolve handle → DID via `com.atproto.identity.resolveHandle`
+   - Used for manual member entry and handle display
 
 3. **Application: Circle Service** - [src/lib/services/circleService.ts](src/lib/services/circleService.ts)
    - Orchestrates domain validation + repository calls
@@ -505,11 +507,12 @@ This keeps PRs small and reviewable (~200-400 lines each).
    - Submit/cancel buttons
 
 8. **Component: MemberSelector** - [src/components/circle/MemberSelector.tsx](src/components/circle/MemberSelector.tsx)
-   - **Bootstrap from Bluesky**: Load following list on mount
-   - Search/filter following list
-   - Select members (checkboxes)
-   - Display selected DIDs with remove option
-   - DID validation for manual entry
+   - **Bootstrap from Bluesky**: Load following list on mount (shows handles)
+   - Search/filter following list by handle
+   - Select members (checkboxes) - displays handles
+   - Manual entry: type handle (e.g., `@user.bsky.social`), resolve to DID
+   - Display selected members as handles with avatars
+   - Store DIDs internally, show handles to user
 
 **Deliverables**:
 - Users can create ONE circle at a time (max 5 total)
@@ -993,11 +996,13 @@ These 5 files are the most important to get right:
 - Future: PDS-level access control or client-side filtering
 
 ### 3. Member Discovery
-**Challenge**: No built-in search for adding circle members in MVP.
+**Challenge**: Users don't know their DIDs - they know their handles.
 
 **Mitigation**:
-- Users manually enter DIDs
-- Future: import from following list, search by handle
+- Users add members by **Bluesky handle** (e.g., `@user.bsky.social`)
+- App resolves handle → DID via `com.atproto.identity.resolveHandle` API
+- Store DIDs in circle records (backend), display handles in UI
+- Bootstrap member selector from user's Bluesky following list (shows handles)
 
 ### 4. OAuth Key Management
 **Challenge**: ES256 private keys must be stored securely.
