@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  wetland-social:
+  web:
     build:
       context: .
       dockerfile: Dockerfile
       target: builder
     container_name: wetland-social-dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - .env.local
     volumes:
@@ -21,3 +21,19 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: wetland-social-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  redis_data:
