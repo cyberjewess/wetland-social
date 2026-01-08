@@ -10,7 +10,10 @@ export async function POST(request: NextRequest) {
     const { code } = await request.json()
 
     if (!code) {
-      return NextResponse.json({ error: 'Missing authorization code' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Missing authorization code' },
+        { status: 400 }
+      )
     }
 
     logger.info('Processing OAuth callback')
@@ -30,7 +33,10 @@ export async function POST(request: NextRequest) {
       refreshJwt: session.refreshJwt || '',
     })
 
-    logger.info({ did: session.did, handle: session.handle }, 'User authenticated successfully')
+    logger.info(
+      { did: session.did, handle: session.handle },
+      'User authenticated successfully'
+    )
 
     return NextResponse.json({ success: true })
   } catch (err) {

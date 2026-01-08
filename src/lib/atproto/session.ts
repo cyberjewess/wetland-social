@@ -23,7 +23,10 @@ export async function getSession(): Promise<Session | null> {
 
   try {
     const session = JSON.parse(sessionCookie.value) as Session
-    logger.debug(redactSensitive({ did: session.did, handle: session.handle }), 'Session retrieved')
+    logger.debug(
+      redactSensitive({ did: session.did, handle: session.handle }),
+      'Session retrieved'
+    )
     return session
   } catch (err) {
     logger.error({ error: err }, 'Failed to parse session cookie')

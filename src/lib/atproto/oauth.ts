@@ -24,7 +24,9 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
     const privateKey = await JoseKey.fromImportable(privateKeyPem, '1')
 
     const clientMetadata = {
-      client_id: process.env.OAUTH_CLIENT_ID || 'http://localhost:3000/client-metadata.json',
+      client_id:
+        process.env.OAUTH_CLIENT_ID ||
+        'http://localhost:3000/client-metadata.json',
       client_name: 'Wetland Social',
       client_uri: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       redirect_uris: [
