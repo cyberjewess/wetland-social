@@ -19,10 +19,14 @@ export async function POST(request: NextRequest) {
     logger.info('Processing OAuth callback')
 
     const client = await getOAuthClient()
-    const result = await client.callback({
-      code,
-      iss: 'https://bsky.social',
-    })
+
+    // Build callback URL with code
+    const url = new URL(request.url)
+    const params = new URLSearchParams()
+    params.set('code', code)
+    params.set('state', request.nextUrl.searchParams.get('state') || '')
+
+    const result = await client.callback(params)
 
     const { session } = result
 
