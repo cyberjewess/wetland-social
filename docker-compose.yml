@@ -1,0 +1,15 @@
+services:
+  # Host the files of the site on port 8089 using nginx
+  wland-server:
+    image: nginx:latest
+    ports:
+      - 8091:80
+    volumes:
+      - ./squat/:/usr/share/nginx/html
+    restart: unless-stopped
+    networks:
+      - devenv
+
+networks:
+  devenv:
+    external: true
