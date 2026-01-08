@@ -163,11 +163,12 @@ Then you only need to configure the URLs once.
 - Verify `.env.local` and `client-metadata.json` have matching URLs
 - Ensure ngrok is running
 
-### Session not persisting
+### OAuth state lost on hot reload / "Unknown authorization session"
 
 - Current implementation uses in-memory storage
-- Sessions are lost when dev server restarts
-- This is expected for development; production will use Redis/database
+- OAuth state is lost when Next.js hot reloads modules
+- **Workaround**: Restart the dev server (`npm run dev`) and try auth again
+- This will be fixed in Phase 1.5 when we add Docker + Redis
 
 ### Build errors
 

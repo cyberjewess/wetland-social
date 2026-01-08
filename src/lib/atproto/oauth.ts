@@ -7,16 +7,31 @@ import { JoseKey } from '@atproto/jwk-jose'
 import type { SimpleStore } from '@atproto-labs/simple-store'
 import fs from 'fs'
 import { createLogger } from '../logger'
-import { createFileStore } from './file-store'
 
 const logger = createLogger({ service: 'oauth' })
 
-// File-based stores for development to survive Next.js hot reloads
-// Use Redis/database for production
+// In-memory stores for development
+// TODO: Replace with Redis in Docker setup (see Phase 1.5 in mvp.md)
+// Note: OAuth state will be lost on Next.js hot reload - restart dev server if auth fails
+function createMemoryStore<
+  T extends NonNullable<unknown> | null,
+>(): SimpleStore<string, T> {
+  const data = new Map<string, T>()
+  return {
+    get: async (key) => data.get(key),
+    set: async (key, value) => {
+      data.set(key, value)
+    },
+    del: async (key) => {
+      data.delete(key)
+    },
+  }
+}
+
 const stateStore: SimpleStore<string, NodeSavedState> =
-  createFileStore<NodeSavedState>('oauth-state')
+  createMemoryStore<NodeSavedState>()
 const sessionStore: SimpleStore<string, NodeSavedSession> =
-  createFileStore<NodeSavedSession>('oauth-session')
+  createMemoryStore<NodeSavedSession>()
 
 let oauthClient: NodeOAuthClient | null = null
 
