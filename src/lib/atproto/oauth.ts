@@ -7,12 +7,11 @@ import { JoseKey } from '@atproto/jwk-jose'
 import type { SimpleStore } from '@atproto-labs/simple-store'
 import fs from 'fs'
 import { createLogger } from '../logger'
+import { createRedisClient, createRedisStore } from './redis-store'
 
 const logger = createLogger({ service: 'oauth' })
 
-// In-memory stores for development
-// TODO: Replace with Redis in Docker setup (see Phase 1.5 in mvp.md)
-// Note: OAuth state will be lost on Next.js hot reload - restart dev server if auth fails
+// In-memory fallback stores for environments without Redis
 function createMemoryStore<
   T extends NonNullable<unknown> | null,
 >(): SimpleStore<string, T> {
@@ -28,10 +27,26 @@ function createMemoryStore<
   }
 }
 
-const stateStore: SimpleStore<string, NodeSavedState> =
-  createMemoryStore<NodeSavedState>()
-const sessionStore: SimpleStore<string, NodeSavedSession> =
-  createMemoryStore<NodeSavedSession>()
+// Initialize stores based on environment
+let stateStore: SimpleStore<string, NodeSavedState>
+let sessionStore: SimpleStore<string, NodeSavedSession>
+
+const redisUrl = process.env.REDIS_URL
+if (redisUrl) {
+  logger.info(
+    { redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') },
+    'Using Redis for OAuth storage'
+  )
+  const redis = createRedisClient(redisUrl)
+  stateStore = createRedisStore<NodeSavedState>('state', redis, 600) // 10 min TTL
+  sessionStore = createRedisStore<NodeSavedSession>('session', redis, 86400) // 24 hour TTL
+} else {
+  logger.warn(
+    'No REDIS_URL configured - using in-memory storage (OAuth state will be lost on hot reload)'
+  )
+  stateStore = createMemoryStore<NodeSavedState>()
+  sessionStore = createMemoryStore<NodeSavedSession>()
+}
 
 let oauthClient: NodeOAuthClient | null = null
 
@@ -47,12 +62,17 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       throw new Error('OAUTH_PRIVATE_KEY_PATH not configured')
     }
 
+    // Resolve path relative to project root if not absolute
+    const resolvedPath = privateKeyPath.startsWith('/')
+      ? privateKeyPath
+      : `${process.cwd()}/${privateKeyPath}`
+
     logger.info(
-      { privateKeyPath },
+      { privateKeyPath: resolvedPath },
       'Creating new OAuth client - loading private key'
     )
 
-    const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8')
+    const privateKeyPem = fs.readFileSync(resolvedPath, 'utf8')
     const privateKey = await JoseKey.fromImportable(privateKeyPem, '1')
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`

@@ -20,9 +20,14 @@ Wetland Social reimagines social media through stratified visibility layers. Ins
 
 ### With Docker (Recommended)
 
+Docker Compose runs Next.js + Redis for OAuth state persistence.
+
 ```bash
-# Start development environment
+# Start development environment (Next.js + Redis)
 make dev
+
+# Start only Redis (for local npm run dev)
+make redis
 
 # Run tests
 make test
@@ -60,9 +65,14 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
    ```env
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    OAUTH_CLIENT_ID=http://localhost:3000/client-metadata.json
-   OAUTH_PRIVATE_KEY_PATH=/path/to/private-key.pem
+   OAUTH_PRIVATE_KEY_PATH=keys/private-key-pkcs8.pem
    SESSION_SECRET=your-random-secret-key-here
    NEXT_PUBLIC_PDS_URL=https://bsky.social
+
+   # Redis (optional - leave empty to use in-memory storage)
+   # Docker Compose: redis://redis:6379
+   # Local Redis: redis://localhost:6379
+   REDIS_URL=
    ```
 
 3. Generate OAuth keys (for Phase 2):
@@ -132,7 +142,8 @@ See [AGENTS.md](AGENTS.md) for the complete development workflow.
 ### Docker Commands
 
 ```bash
-make dev      # Start development environment
+make dev      # Start development environment (Next.js + Redis)
+make redis    # Start only Redis (for local npm run dev)
 make build    # Build Docker images
 make prod     # Start production environment
 make stop     # Stop all containers
@@ -141,6 +152,8 @@ make test     # Run unit tests in Docker
 make clean    # Remove containers and volumes
 make help     # Show all commands
 ```
+
+**Note**: Docker Compose provides Redis for OAuth state persistence, eliminating hot reload issues during development.
 
 ## Testing
 
@@ -172,7 +185,7 @@ See [docs/plans/mvp.md](docs/plans/mvp.md) for lexicon specifications.
 
 ## API Endpoints
 
-- `GET /api/health` - Health check (returns `{ status: "ok" }`)
+- `GET /api/health` - Health check with Redis connectivity status
 - `POST /api/auth/[...atproto]` - OAuth authentication (Phase 2)
 
 ## Observability & Logging
@@ -213,7 +226,7 @@ See [docs/plans/mvp.md](docs/plans/mvp.md#docker-configuration) for production s
 - **React Query** - Server state management
 - **Zod** - Schema validation
 - **Jest** - Unit testing
-- **Docker** - Containerization
+- **Docker + Redis** - Containerization and OAuth state persistence
 
 ## Contributing
 

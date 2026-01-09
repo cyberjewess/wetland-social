@@ -1,4 +1,4 @@
-.PHONY: dev build prod stop logs test clean help
+.PHONY: dev build prod stop logs test clean help redis
 
 dev:
 	docker-compose up
@@ -12,11 +12,14 @@ prod:
 stop:
 	docker-compose down
 
+redis:
+	docker-compose up redis
+
 logs:
 	docker-compose logs -f
 
 test:
-	docker-compose run --rm wetland-social npm test
+	docker-compose run --rm web npm test
 
 clean:
 	docker-compose down -v
@@ -24,9 +27,10 @@ clean:
 
 help:
 	@echo "Available commands:"
-	@echo "  make dev    - Start development environment"
+	@echo "  make dev    - Start development environment (Next.js + Redis)"
 	@echo "  make build  - Build Docker images"
 	@echo "  make prod   - Start production environment"
+	@echo "  make redis  - Start only Redis (for local npm run dev)"
 	@echo "  make stop   - Stop all containers"
 	@echo "  make logs   - View container logs"
 	@echo "  make test   - Run unit tests"
