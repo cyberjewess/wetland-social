@@ -7,31 +7,41 @@ import { JoseKey } from '@atproto/jwk-jose'
 import type { SimpleStore } from '@atproto-labs/simple-store'
 import fs from 'fs'
 import { createLogger } from '../logger'
+import { createRedisClient, createRedisStore } from './redis-store'
 
 const logger = createLogger({ service: 'oauth' })
 
-// In-memory stores for development
-// TODO: Replace with Redis in Docker setup (see Phase 1.5 in mvp.md)
-// Note: OAuth state will be lost on Next.js hot reload - restart dev server if auth fails
+// In-memory fallback stores for environments without Redis
 function createMemoryStore<
   T extends NonNullable<unknown> | null,
 >(): SimpleStore<string, T> {
   const data = new Map<string, T>()
   return {
-    get: async key => data.get(key),
+    get: async (key) => data.get(key),
     set: async (key, value) => {
       data.set(key, value)
     },
-    del: async key => {
+    del: async (key) => {
       data.delete(key)
     },
   }
 }
 
-const stateStore: SimpleStore<string, NodeSavedState> =
-  createMemoryStore<NodeSavedState>()
-const sessionStore: SimpleStore<string, NodeSavedSession> =
-  createMemoryStore<NodeSavedSession>()
+// Initialize stores based on environment
+let stateStore: SimpleStore<string, NodeSavedState>
+let sessionStore: SimpleStore<string, NodeSavedSession>
+
+const redisUrl = process.env.REDIS_URL
+if (redisUrl) {
+  logger.info({ redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') }, 'Using Redis for OAuth storage')
+  const redis = createRedisClient(redisUrl)
+  stateStore = createRedisStore<NodeSavedState>('state', redis, 600) // 10 min TTL
+  sessionStore = createRedisStore<NodeSavedSession>('session', redis, 86400) // 24 hour TTL
+} else {
+  logger.warn('No REDIS_URL configured - using in-memory storage (OAuth state will be lost on hot reload)')
+  stateStore = createMemoryStore<NodeSavedState>()
+  sessionStore = createMemoryStore<NodeSavedSession>()
+}
 
 let oauthClient: NodeOAuthClient | null = null
 
