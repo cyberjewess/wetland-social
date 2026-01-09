@@ -45,7 +45,7 @@ export class CircleValidationError extends Error {
  * @throws CircleValidationError if invalid
  */
 export function validateCircleName(name: string): void {
-  if (!name || typeof name !== 'string') {
+  if (typeof name !== 'string' || name === null || name === undefined) {
     throw new CircleValidationError('Circle name is required')
   }
 
