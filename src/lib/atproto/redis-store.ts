@@ -36,10 +36,7 @@ export function createRedisStore<T extends NonNullable<unknown> | null>(
         logger.debug({ key, storeName }, 'Retrieved from Redis')
         return parsed
       } catch (err) {
-        logger.error(
-          { error: err, key, storeName },
-          'Failed to get from Redis'
-        )
+        logger.error({ error: err, key, storeName }, 'Failed to get from Redis')
         throw err
       }
     },
@@ -54,10 +51,7 @@ export function createRedisStore<T extends NonNullable<unknown> | null>(
 
         logger.debug({ key, storeName, ttl: ttlSeconds }, 'Saved to Redis')
       } catch (err) {
-        logger.error(
-          { error: err, key, storeName },
-          'Failed to set in Redis'
-        )
+        logger.error({ error: err, key, storeName }, 'Failed to set in Redis')
         throw err
       }
     },
@@ -104,7 +98,7 @@ export function createRedisClient(url: string): Redis {
     logger.info('Connected to Redis')
   })
 
-  redis.on('error', (err) => {
+  redis.on('error', err => {
     logger.error({ error: err }, 'Redis connection error')
   })
 

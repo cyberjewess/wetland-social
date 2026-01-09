@@ -24,7 +24,10 @@ export async function GET() {
       redis.disconnect()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
-      logger.error({ error: errorMessage, redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') }, 'Redis health check failed')
+      logger.error(
+        { error: errorMessage, redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') },
+        'Redis health check failed'
+      )
       health.redis = 'disconnected'
       health.status = 'degraded'
     }

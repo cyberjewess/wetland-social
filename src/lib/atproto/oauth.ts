@@ -17,11 +17,11 @@ function createMemoryStore<
 >(): SimpleStore<string, T> {
   const data = new Map<string, T>()
   return {
-    get: async (key) => data.get(key),
+    get: async key => data.get(key),
     set: async (key, value) => {
       data.set(key, value)
     },
-    del: async (key) => {
+    del: async key => {
       data.delete(key)
     },
   }
@@ -33,12 +33,17 @@ let sessionStore: SimpleStore<string, NodeSavedSession>
 
 const redisUrl = process.env.REDIS_URL
 if (redisUrl) {
-  logger.info({ redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') }, 'Using Redis for OAuth storage')
+  logger.info(
+    { redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') },
+    'Using Redis for OAuth storage'
+  )
   const redis = createRedisClient(redisUrl)
   stateStore = createRedisStore<NodeSavedState>('state', redis, 600) // 10 min TTL
   sessionStore = createRedisStore<NodeSavedSession>('session', redis, 86400) // 24 hour TTL
 } else {
-  logger.warn('No REDIS_URL configured - using in-memory storage (OAuth state will be lost on hot reload)')
+  logger.warn(
+    'No REDIS_URL configured - using in-memory storage (OAuth state will be lost on hot reload)'
+  )
   stateStore = createMemoryStore<NodeSavedState>()
   sessionStore = createMemoryStore<NodeSavedSession>()
 }
