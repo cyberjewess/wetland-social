@@ -3,9 +3,73 @@
 ## Prerequisites
 
 - Node.js 18+ and npm
+- Docker and Docker Compose (recommended)
 - ngrok (for OAuth testing with HTTPS)
 
-## Initial Setup
+## Development Options
+
+You have two options for local development:
+
+1. **Docker Compose (Recommended)** - Runs Next.js + Redis in containers
+2. **Local npm** - Run `npm run dev` locally with optional Redis
+
+## Option 1: Docker Compose Development (Recommended)
+
+Docker Compose provides Redis for OAuth state persistence, eliminating the hot reload issue.
+
+### Quick Start
+
+```bash
+# Start both Next.js and Redis
+make dev
+
+# Or manually:
+docker-compose up
+```
+
+Access the app at your ngrok HTTPS URL (see ngrok setup below).
+
+### Docker Commands
+
+```bash
+make dev     # Start dev environment (Next.js + Redis)
+make redis   # Start only Redis (for local npm run dev)
+make build   # Rebuild Docker images
+make stop    # Stop containers
+make logs    # View logs
+make clean   # Remove containers and volumes
+```
+
+### How It Works
+
+- **Next.js** runs in a container with hot reload
+- **Redis** stores OAuth state, persisting across hot reloads
+- Your source code is mounted as a volume for instant updates
+- `node_modules` and `.next` stay in the container for performance
+
+## Option 2: Local npm Development
+
+Run Next.js locally without Docker. OAuth state will be lost on hot reload unless you start Redis separately.
+
+### With Redis (Recommended)
+
+```bash
+# Terminal 1: Start Redis only
+make redis
+
+# Terminal 2: Start Next.js locally
+npm run dev
+```
+
+### Without Redis (In-Memory Storage)
+
+```bash
+npm run dev
+```
+
+**Note**: OAuth state is lost on hot reload. Restart dev server if auth fails.
+
+## Initial Setup (Both Options)
 
 ### 1. Install Dependencies
 
