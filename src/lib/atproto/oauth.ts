@@ -57,12 +57,17 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
       throw new Error('OAUTH_PRIVATE_KEY_PATH not configured')
     }
 
+    // Resolve path relative to project root if not absolute
+    const resolvedPath = privateKeyPath.startsWith('/')
+      ? privateKeyPath
+      : `${process.cwd()}/${privateKeyPath}`
+
     logger.info(
-      { privateKeyPath },
+      { privateKeyPath: resolvedPath },
       'Creating new OAuth client - loading private key'
     )
 
-    const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8')
+    const privateKeyPem = fs.readFileSync(resolvedPath, 'utf8')
     const privateKey = await JoseKey.fromImportable(privateKeyPem, '1')
 
     const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`
