@@ -1,0 +1,29 @@
+{
+  "lexicon": 1,
+  "id": "app.wland.defs",
+  "defs": {
+    "postLevel": {
+      "type": "string",
+      "description": "Post visibility level",
+      "enum": ["global", "circle"],
+      "knownValues": ["global", "circle"]
+    },
+    "circleRef": {
+      "type": "object",
+      "description": "Reference to a circle record",
+      "required": ["uri", "cid"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "AT-URI of the circle record"
+        },
+        "cid": {
+          "type": "string",
+          "format": "cid",
+          "description": "Content identifier (CID) of the circle record"
+        }
+      }
+    }
+  }
+}

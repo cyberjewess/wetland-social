@@ -1,0 +1,49 @@
+{
+  "lexicon": 1,
+  "id": "app.wland.circle",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A trusted group of users for circle-level posts",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["name", "members", "createdAt", "updatedAt"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 500,
+            "maxGraphemes": 50,
+            "description": "Circle name (max 50 graphemes)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "maxGraphemes": 200,
+            "description": "Optional description (max 200 graphemes)"
+          },
+          "members": {
+            "type": "array",
+            "description": "Array of member DIDs (max 1000)",
+            "maxLength": 1000,
+            "items": {
+              "type": "string",
+              "format": "did",
+              "description": "DID of circle member"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when circle was created"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when circle was last updated"
+          }
+        }
+      }
+    }
+  }
+}
