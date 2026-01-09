@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createRedisClient } from '@/lib/atproto/redis-store'
+import { createLogger } from '@/lib/logger'
+
+const logger = createLogger({ service: 'health' })
 
 export async function GET() {
   const health: {
@@ -20,6 +23,8 @@ export async function GET() {
       health.redis = 'connected'
       redis.disconnect()
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      logger.error({ error: errorMessage, redisUrl: redisUrl.replace(/:[^:]*@/, ':***@') }, 'Redis health check failed')
       health.redis = 'disconnected'
       health.status = 'degraded'
     }
