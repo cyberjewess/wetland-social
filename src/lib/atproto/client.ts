@@ -29,6 +29,10 @@ export async function getProfile(actor: string) {
 
 /**
  * Create an authenticated AT Protocol agent from a session
+ *
+ * Note: For OAuth-based authentication, we use the OAuth client's session
+ * which manages tokens internally. This function retrieves the OAuth session
+ * and creates an agent that uses the OAuth session's authenticated fetch handler.
  */
 export async function createAuthenticatedAgent(session: {
   did: string
@@ -36,15 +40,33 @@ export async function createAuthenticatedAgent(session: {
   accessJwt: string
   refreshJwt: string
 }): Promise<AtpAgent> {
-  const agent = new AtpAgent({ service: PDS_URL })
+  // Import OAuth client here to avoid circular dependencies
+  const { getOAuthClient } = await import('./oauth')
+  const oauthClient = await getOAuthClient()
 
-  await agent.resumeSession({
-    did: session.did,
-    handle: session.handle,
-    accessJwt: session.accessJwt,
-    refreshJwt: session.refreshJwt,
-    active: true,
-  })
+  try {
+    // Try to get the OAuth session for this DID
+    const oauthSession = await oauthClient.restore(session.did)
 
-  return agent
+    if (oauthSession) {
+      // Create an agent that uses the OAuth session's authenticated fetch
+      // Wrap the OAuth fetchHandler to match the standard fetch signature
+      const wrappedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        return oauthSession.fetchHandler(url, init)
+      }
+
+      const agent = new AtpAgent({
+        service: PDS_URL,
+        fetch: wrappedFetch,
+      })
+      return agent
+    }
+  } catch (err) {
+    logger.error({ error: err, did: session.did }, 'Failed to restore OAuth session')
+  }
+
+  // Fallback: create unauthenticated agent (will fail for authenticated operations)
+  logger.warn({ did: session.did }, 'No OAuth session found, creating unauthenticated agent')
+  throw new Error('No valid OAuth session found')
 }
