@@ -66,7 +66,7 @@ export class CircleRepository {
       return {
         ...(response.data.value as unknown as WetlandCircle),
         uri: response.data.uri,
-        cid: response.data.cid,
+        cid: response.data.cid || '',
         owner: did,
       }
     } catch (err) {
@@ -96,7 +96,7 @@ export class CircleRepository {
         repo: did,
         collection: CIRCLE_COLLECTION,
         rkey: TID.nextStr(), // Generate timestamp-based ID
-        record,
+        record: record as unknown as Record<string, unknown>,
       })
 
       logger.info(
@@ -149,7 +149,7 @@ export class CircleRepository {
         repo: did,
         collection,
         rkey,
-        record,
+        record: record as unknown as Record<string, unknown>,
       })
 
       logger.info({ uri, cid: response.data.cid }, 'Circle updated')
