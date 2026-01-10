@@ -110,7 +110,10 @@ wetland-social/
 
 Wetland Social uses a **layered architecture** for testability:
 
-1. **Domain Layer** (`src/domain/`) - Pure business logic, no external dependencies
+1. **Domain Layer** (`src/domain/`) - ✅ Pure business logic, no external dependencies
+   - Post & Circle entities with validation
+   - 90 unit tests, 100% coverage of business rules
+   - DID validation, grapheme counting
 2. **Infrastructure Layer** (`src/lib/atproto/`) - AT Protocol integration
 3. **Application Layer** (`src/lib/services/`) - Service orchestration
 4. **Presentation Layer** (`app/`, `src/components/`) - UI components

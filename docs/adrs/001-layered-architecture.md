@@ -99,6 +99,33 @@ We will implement a **layered architecture** with four distinct layers:
 - **Considered**: More formal but similar to our approach
 - **Decision**: Our layered approach is simpler and sufficient for MVP scope
 
+## Implementation Status
+
+### Phase 3 (Completed 2026-01-09)
+✅ **Domain Layer** - Fully implemented with 90 unit tests
+
+**Modules**:
+- `src/domain/shared/` - DID validation, grapheme counting
+- `src/domain/post/` - Post entity with 300 grapheme limit, level validation
+- `src/domain/circle/` - Circle entity with max 5/user rule, member management
+- `src/types/wetland.ts` - TypeScript types mirroring AT Protocol lexicons
+
+**Validation**:
+- All business rules enforced in pure functions
+- 100% unit test coverage of domain logic
+- Zero external dependencies (no `@atproto/*` in domain layer)
+- Tests run in < 2 seconds
+
+**Lexicons**:
+- `lexicons/app/wland/post.json` - Post record schema
+- `lexicons/app/wland/circle.json` - Circle record schema
+- `lexicons/app/wland/defs.json` - Shared type definitions
+
+### Next Steps
+- Phase 4: Infrastructure layer (repositories, PDS communication)
+- Phase 5: Application layer (services)
+- Phase 6: Presentation layer (React components, feeds)
+
 ## References
 
 - [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
