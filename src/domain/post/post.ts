@@ -97,14 +97,20 @@ export function validatePostLevel(
   // Validate circleRef structure if provided
   if (circleRef) {
     if (!circleRef.uri || typeof circleRef.uri !== 'string') {
-      throw new PostValidationError('circleRef.uri is required and must be a string')
+      throw new PostValidationError(
+        'circleRef.uri is required and must be a string'
+      )
     }
     if (!circleRef.cid || typeof circleRef.cid !== 'string') {
-      throw new PostValidationError('circleRef.cid is required and must be a string')
+      throw new PostValidationError(
+        'circleRef.cid is required and must be a string'
+      )
     }
     // Basic AT-URI format check
     if (!circleRef.uri.startsWith('at://')) {
-      throw new PostValidationError('circleRef.uri must be a valid AT-URI (starts with at://)')
+      throw new PostValidationError(
+        'circleRef.uri must be a valid AT-URI (starts with at://)'
+      )
     }
   }
 }

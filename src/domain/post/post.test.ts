@@ -77,9 +77,9 @@ describe('Post Domain', () => {
     })
 
     it('should reject invalid levels', () => {
-      expect(() => validatePostLevel('invalid' as unknown as PostLevel)).toThrow(
-        'Invalid post level'
-      )
+      expect(() =>
+        validatePostLevel('invalid' as unknown as PostLevel)
+      ).toThrow('Invalid post level')
     })
 
     it('should reject circleRef without uri', () => {
