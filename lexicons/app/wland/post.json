@@ -1,0 +1,57 @@
+{
+  "lexicon": 1,
+  "id": "app.wland.post",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A post with stratified visibility level",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "level", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "maxGraphemes": 300,
+            "description": "The post content (max 300 graphemes)"
+          },
+          "level": {
+            "type": "ref",
+            "ref": "app.wland.defs#postLevel",
+            "description": "Visibility level of the post"
+          },
+          "circleRef": {
+            "type": "ref",
+            "ref": "app.wland.defs#circleRef",
+            "description": "Reference to circle (required if level='circle')"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Timestamp when post was created"
+          },
+          "langs": {
+            "type": "array",
+            "description": "Optional language codes (ISO 639-1)",
+            "maxLength": 3,
+            "items": {
+              "type": "string",
+              "format": "language",
+              "minLength": 2,
+              "maxLength": 2
+            }
+          },
+          "facets": {
+            "type": "array",
+            "description": "Rich text formatting (mentions, links) - future use",
+            "items": {
+              "type": "ref",
+              "ref": "app.bsky.richtext.facet"
+            }
+          }
+        }
+      }
+    }
+  }
+}
