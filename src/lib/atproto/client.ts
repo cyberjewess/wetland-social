@@ -37,13 +37,14 @@ export async function createAuthenticatedAgent(session: {
   refreshJwt: string
 }): Promise<AtpAgent> {
   const agent = new AtpAgent({ service: PDS_URL })
-  
+
   await agent.resumeSession({
     did: session.did,
     handle: session.handle,
     accessJwt: session.accessJwt,
     refreshJwt: session.refreshJwt,
+    active: true,
   })
-  
+
   return agent
 }
