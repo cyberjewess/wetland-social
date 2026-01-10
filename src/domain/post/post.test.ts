@@ -5,9 +5,9 @@ import {
   validatePostLevel,
   validateDateTime,
   PostValidationError,
-  MAX_POST_GRAPHEMES,
   getPostSummary,
 } from './post'
+import type { PostLevel } from './postLevel'
 
 describe('Post Domain', () => {
   describe('validatePostText', () => {
@@ -71,7 +71,7 @@ describe('Post Domain', () => {
     })
 
     it('should reject invalid levels', () => {
-      expect(() => validatePostLevel('invalid' as any)).toThrow(
+      expect(() => validatePostLevel('invalid' as unknown as PostLevel)).toThrow(
         'Invalid post level'
       )
     })

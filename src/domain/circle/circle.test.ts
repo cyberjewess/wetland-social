@@ -10,11 +10,7 @@ import {
   addMember,
   removeMember,
 } from './circle'
-import {
-  MAX_CIRCLE_NAME_GRAPHEMES,
-  MAX_CIRCLE_DESCRIPTION_GRAPHEMES,
-  MAX_CIRCLE_MEMBERS,
-} from './circleRules'
+import { MAX_CIRCLE_MEMBERS } from './circleRules'
 
 describe('Circle Domain', () => {
   const validMembers = [

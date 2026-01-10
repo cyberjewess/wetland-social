@@ -30,7 +30,7 @@ export interface WetlandPost {
   circleRef?: string // AT-URI, required if level='circle'
   createdAt: string // ISO datetime
   langs?: string[] // ISO 639-1 language codes
-  facets?: any[] // Rich text facets (future use)
+  facets?: unknown[] // Rich text facets (future use)
 }
 
 /**
