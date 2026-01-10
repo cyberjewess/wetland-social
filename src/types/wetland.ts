@@ -12,6 +12,23 @@
 export type PostLevel = 'global' | 'circle'
 
 /**
+ * Rich text facet for mentions, links, and hashtags
+ * From: app.bsky.richtext.facet (AT Protocol standard)
+ * Note: Not implemented in MVP, included for future use
+ */
+export interface RichTextFacet {
+  index: {
+    byteStart: number
+    byteEnd: number
+  }
+  features: Array<
+    | { $type: 'app.bsky.richtext.facet#mention'; did: string }
+    | { $type: 'app.bsky.richtext.facet#link'; uri: string }
+    | { $type: 'app.bsky.richtext.facet#tag'; tag: string }
+  >
+}
+
+/**
  * Reference to a circle record
  * From: app.wland.defs#circleRef
  */
@@ -30,7 +47,7 @@ export interface WetlandPost {
   circleRef?: string // AT-URI, required if level='circle'
   createdAt: string // ISO datetime
   langs?: string[] // ISO 639-1 language codes
-  facets?: unknown[] // Rich text facets (future use)
+  facets?: RichTextFacet[] // Rich text facets (future use)
 }
 
 /**
