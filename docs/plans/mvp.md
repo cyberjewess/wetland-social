@@ -642,6 +642,74 @@ This keeps PRs small and reviewable (~200-400 lines each).
 
 **PR Title**: `Phase 4: Circle management with Bluesky social graph bootstrap`
 
+**Known Issues**:
+- OAuth token authentication not working - `InvalidToken` errors on API calls
+- OAuth session restored from Redis but tokens appear expired/invalid
+- Member selector and circle creation fail due to auth issues
+- **See Phase 4.5 for fix**
+
+---
+
+### Phase 4.5: Fix OAuth Authentication for API Calls
+**Branch**: `feat/phase-4.5-oauth-fix`
+**Estimated files**: ~5
+**PR Size**: Small (~150 lines)
+
+**Goal**: Fix OAuth token authentication so circle creation and member selection work
+
+**Problem**:
+Currently, the OAuth client manages tokens internally and stores sessions in Redis. When we try to restore the OAuth session and use its `fetchHandler` for authenticated API calls, we get `InvalidToken` errors. The tokens stored in the OAuth session appear to be expired or invalid.
+
+**Root Cause**:
+- OAuth session is successfully restored from Redis
+- But calling `oauthSession.fetchHandler()` directly doesn't trigger token refresh
+- The wrapped fetch in `AtpAgent` might not be compatible with OAuth session's authentication flow
+
+**Potential Solutions**:
+
+1. **Use OAuth client's agent directly** (if it exposes one)
+   - Check if `@atproto/oauth-client-node` provides a direct agent
+   - Avoid wrapping fetchHandler
+
+2. **Implement proper token refresh flow**
+   - Hook into OAuth session's token refresh mechanism
+   - Ensure tokens are refreshed before making API calls
+
+3. **Alternative: Store actual JWT tokens**
+   - Extract access/refresh tokens from OAuth result
+   - Store them in session cookie
+   - Use traditional `agent.resumeSession()` approach
+   - May lose OAuth's automatic token management benefits
+
+#### Tasks
+
+1. **Investigate OAuth client API**
+   - Read `@atproto/oauth-client-node` docs for proper agent usage
+   - Check if OAuth session exposes a ready-to-use agent
+   - Test token refresh behavior
+
+2. **Fix createAuthenticatedAgent** - [src/lib/atproto/client.ts](src/lib/atproto/client.ts)
+   - Implement correct approach based on investigation
+   - Ensure token refresh happens automatically
+   - Add better error logging for debugging
+
+3. **Update session storage if needed** - [app/api/auth/callback/route.ts](app/api/auth/callback/route.ts)
+   - If going with JWT approach, extract and store real tokens
+   - Document trade-offs in comments
+
+4. **Test authenticated operations**
+   - Circle creation
+   - Member selector (following list fetch)
+   - Circle listing
+
+**Deliverables**:
+- OAuth authentication works for all API calls
+- Circle creation succeeds
+- Member selector loads following list from Bluesky
+- No `InvalidToken` errors
+
+**PR Title**: `Phase 4.5: Fix OAuth authentication for authenticated API calls`
+
 ---
 
 ### Phase 5: Post Creation (Infrastructure + UI)
