@@ -22,14 +22,20 @@ describe('Post Domain', () => {
     })
 
     it('should reject null/undefined', () => {
-      expect(() => validatePostText(null as unknown as string)).toThrow('Post text is required')
-      expect(() => validatePostText(undefined as unknown as string)).toThrow('Post text is required')
+      expect(() => validatePostText(null as unknown as string)).toThrow(
+        'Post text is required'
+      )
+      expect(() => validatePostText(undefined as unknown as string)).toThrow(
+        'Post text is required'
+      )
     })
 
     it('should reject text exceeding 300 graphemes', () => {
       const longText = 'A'.repeat(301)
       expect(() => validatePostText(longText)).toThrow(PostValidationError)
-      expect(() => validatePostText(longText)).toThrow('exceeds maximum length of 300 graphemes')
+      expect(() => validatePostText(longText)).toThrow(
+        'exceeds maximum length of 300 graphemes'
+      )
     })
 
     it('should count emoji as single graphemes', () => {
@@ -47,21 +53,27 @@ describe('Post Domain', () => {
     })
 
     it('should accept circle with circleRef', () => {
-      expect(() => validatePostLevel('circle', 'at://did:plc:abc/app.wland.circle/123')).not.toThrow()
+      expect(() =>
+        validatePostLevel('circle', 'at://did:plc:abc/app.wland.circle/123')
+      ).not.toThrow()
     })
 
     it('should reject circle without circleRef', () => {
-      expect(() => validatePostLevel('circle')).toThrow('Circle posts must have a circleRef')
-    })
-
-    it('should reject global with circleRef', () => {
-      expect(() => validatePostLevel('global', 'at://did:plc:abc/app.wland.circle/123')).toThrow(
-        'Global posts cannot have a circleRef'
+      expect(() => validatePostLevel('circle')).toThrow(
+        'Circle posts must have a circleRef'
       )
     })
 
+    it('should reject global with circleRef', () => {
+      expect(() =>
+        validatePostLevel('global', 'at://did:plc:abc/app.wland.circle/123')
+      ).toThrow('Global posts cannot have a circleRef')
+    })
+
     it('should reject invalid levels', () => {
-      expect(() => validatePostLevel('invalid' as any)).toThrow('Invalid post level')
+      expect(() => validatePostLevel('invalid' as any)).toThrow(
+        'Invalid post level'
+      )
     })
   })
 
@@ -72,9 +84,13 @@ describe('Post Domain', () => {
     })
 
     it('should reject invalid datetimes', () => {
-      expect(() => validateDateTime('invalid')).toThrow('createdAt must be a valid ISO datetime')
+      expect(() => validateDateTime('invalid')).toThrow(
+        'createdAt must be a valid ISO datetime'
+      )
       expect(() => validateDateTime('')).toThrow('createdAt is required')
-      expect(() => validateDateTime(null as unknown as string)).toThrow('createdAt is required')
+      expect(() => validateDateTime(null as unknown as string)).toThrow(
+        'createdAt is required'
+      )
     })
   })
 
@@ -115,7 +131,9 @@ describe('Post Domain', () => {
         createdAt: new Date().toISOString(),
         langs: ['english', 'spanish'], // Should be 2-letter codes
       }
-      expect(() => validatePost(post)).toThrow('langs must be an array of 2-letter ISO language codes')
+      expect(() => validatePost(post)).toThrow(
+        'langs must be an array of 2-letter ISO language codes'
+      )
     })
 
     it('should reject post with non-array langs', () => {

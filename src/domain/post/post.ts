@@ -118,8 +118,12 @@ export function validatePost(post: Post): void {
       throw new PostValidationError('langs must be an array')
     }
 
-    if (post.langs.some(lang => typeof lang !== 'string' || lang.length !== 2)) {
-      throw new PostValidationError('langs must be an array of 2-letter ISO language codes')
+    if (
+      post.langs.some(lang => typeof lang !== 'string' || lang.length !== 2)
+    ) {
+      throw new PostValidationError(
+        'langs must be an array of 2-letter ISO language codes'
+      )
     }
   }
 }
@@ -158,6 +162,7 @@ export function createPost(params: {
  */
 export function getPostSummary(post: Post): string {
   const graphemeCount = countGraphemes(post.text)
-  const preview = graphemeCount > 50 ? post.text.slice(0, 50) + '...' : post.text
+  const preview =
+    graphemeCount > 50 ? post.text.slice(0, 50) + '...' : post.text
   return `${post.level} post: ${preview}`
 }

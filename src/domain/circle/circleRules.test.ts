@@ -14,7 +14,9 @@ describe('Circle Rules', () => {
     })
 
     it('should throw when limit reached', () => {
-      expect(() => assertCircleLimit(5)).toThrow(`Cannot create more circles. Maximum allowed: ${MAX_CIRCLES_PER_USER}`)
+      expect(() => assertCircleLimit(5)).toThrow(
+        `Cannot create more circles. Maximum allowed: ${MAX_CIRCLES_PER_USER}`
+      )
     })
 
     it('should throw when limit exceeded', () => {
@@ -30,7 +32,9 @@ describe('Circle Rules', () => {
     })
 
     it('should throw for negative member counts', () => {
-      expect(() => assertMemberLimit(-1)).toThrow('Circle member count cannot be negative')
+      expect(() => assertMemberLimit(-1)).toThrow(
+        'Circle member count cannot be negative'
+      )
     })
 
     it('should throw when exceeding member limit', () => {

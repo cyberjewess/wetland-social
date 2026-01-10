@@ -31,19 +31,29 @@ describe('Circle Domain', () => {
     })
 
     it('should reject empty names', () => {
-      expect(() => validateCircleName('')).toThrow('Circle name cannot be empty')
-      expect(() => validateCircleName('   ')).toThrow('Circle name cannot be empty')
+      expect(() => validateCircleName('')).toThrow(
+        'Circle name cannot be empty'
+      )
+      expect(() => validateCircleName('   ')).toThrow(
+        'Circle name cannot be empty'
+      )
     })
 
     it('should reject null/undefined', () => {
-      expect(() => validateCircleName(null as unknown as string)).toThrow('Circle name is required')
-      expect(() => validateCircleName(undefined as unknown as string)).toThrow('Circle name is required')
+      expect(() => validateCircleName(null as unknown as string)).toThrow(
+        'Circle name is required'
+      )
+      expect(() => validateCircleName(undefined as unknown as string)).toThrow(
+        'Circle name is required'
+      )
     })
 
     it('should reject names exceeding 50 graphemes', () => {
       const longName = 'A'.repeat(51)
       expect(() => validateCircleName(longName)).toThrow(CircleValidationError)
-      expect(() => validateCircleName(longName)).toThrow('exceeds maximum length of 50 graphemes')
+      expect(() => validateCircleName(longName)).toThrow(
+        'exceeds maximum length of 50 graphemes'
+      )
     })
   })
 
@@ -59,7 +69,9 @@ describe('Circle Domain', () => {
 
     it('should reject descriptions exceeding 200 graphemes', () => {
       const longDesc = 'A'.repeat(201)
-      expect(() => validateCircleDescription(longDesc)).toThrow('exceeds maximum length of 200 graphemes')
+      expect(() => validateCircleDescription(longDesc)).toThrow(
+        'exceeds maximum length of 200 graphemes'
+      )
     })
   })
 
@@ -70,20 +82,31 @@ describe('Circle Domain', () => {
     })
 
     it('should reject non-array inputs', () => {
-      expect(() => validateCircleMembers(null as unknown as string[])).toThrow('Circle members must be an array')
+      expect(() => validateCircleMembers(null as unknown as string[])).toThrow(
+        'Circle members must be an array'
+      )
     })
 
     it('should reject invalid DIDs', () => {
-      expect(() => validateCircleMembers(['invalid', 'did:plc:abc123'])).toThrow('All circle members must be valid DIDs')
+      expect(() =>
+        validateCircleMembers(['invalid', 'did:plc:abc123'])
+      ).toThrow('All circle members must be valid DIDs')
     })
 
     it('should reject duplicate members', () => {
-      expect(() => validateCircleMembers(['did:plc:abc123', 'did:plc:abc123'])).toThrow('Circle members must be unique')
+      expect(() =>
+        validateCircleMembers(['did:plc:abc123', 'did:plc:abc123'])
+      ).toThrow('Circle members must be unique')
     })
 
     it('should reject exceeding member limit', () => {
-      const tooManyMembers = Array.from({ length: MAX_CIRCLE_MEMBERS + 1 }, (_, i) => `did:plc:member${i}`)
-      expect(() => validateCircleMembers(tooManyMembers)).toThrow(`Circle cannot have more than ${MAX_CIRCLE_MEMBERS} members`)
+      const tooManyMembers = Array.from(
+        { length: MAX_CIRCLE_MEMBERS + 1 },
+        (_, i) => `did:plc:member${i}`
+      )
+      expect(() => validateCircleMembers(tooManyMembers)).toThrow(
+        `Circle cannot have more than ${MAX_CIRCLE_MEMBERS} members`
+      )
     })
   })
 
@@ -116,7 +139,9 @@ describe('Circle Domain', () => {
         createdAt: 'invalid',
         updatedAt: new Date().toISOString(),
       }
-      expect(() => validateCircle(circle)).toThrow('createdAt must be a valid ISO datetime')
+      expect(() => validateCircle(circle)).toThrow(
+        'createdAt must be a valid ISO datetime'
+      )
     })
 
     it('should reject invalid updatedAt', () => {
@@ -126,7 +151,9 @@ describe('Circle Domain', () => {
         createdAt: new Date().toISOString(),
         updatedAt: 'invalid',
       }
-      expect(() => validateCircle(circle)).toThrow('updatedAt must be a valid ISO datetime')
+      expect(() => validateCircle(circle)).toThrow(
+        'updatedAt must be a valid ISO datetime'
+      )
     })
   })
 
@@ -237,7 +264,9 @@ describe('Circle Domain', () => {
     })
 
     it('should throw if member already exists', () => {
-      expect(() => addMember(circle, 'did:plc:abc123')).toThrow('Member already exists in circle')
+      expect(() => addMember(circle, 'did:plc:abc123')).toThrow(
+        'Member already exists in circle'
+      )
     })
 
     it('should validate member DID', () => {
@@ -260,7 +289,9 @@ describe('Circle Domain', () => {
     })
 
     it('should throw if member does not exist', () => {
-      expect(() => removeMember(circle, 'did:plc:notamember')).toThrow('Member does not exist in circle')
+      expect(() => removeMember(circle, 'did:plc:notamember')).toThrow(
+        'Member does not exist in circle'
+      )
     })
   })
 })

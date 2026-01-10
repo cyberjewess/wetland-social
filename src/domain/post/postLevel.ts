@@ -33,8 +33,12 @@ export function isValidPostLevel(level: string): level is PostLevel {
  * @param level - The level to validate
  * @throws Error if invalid
  */
-export function assertValidPostLevel(level: string): asserts level is PostLevel {
+export function assertValidPostLevel(
+  level: string
+): asserts level is PostLevel {
   if (!isValidPostLevel(level)) {
-    throw new Error(`Invalid post level: ${level}. Must be one of: ${POST_LEVELS.join(', ')}`)
+    throw new Error(
+      `Invalid post level: ${level}. Must be one of: ${POST_LEVELS.join(', ')}`
+    )
   }
 }

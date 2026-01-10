@@ -39,7 +39,9 @@ describe('DID Validation', () => {
     })
 
     it('should throw for invalid DIDs', () => {
-      expect(() => assertValidDid('invalid')).toThrow('Invalid DID format: invalid')
+      expect(() => assertValidDid('invalid')).toThrow(
+        'Invalid DID format: invalid'
+      )
       expect(() => assertValidDid('')).toThrow('Invalid DID format: ')
     })
   })
@@ -47,14 +49,18 @@ describe('DID Validation', () => {
   describe('areValidDids', () => {
     it('should validate array of valid DIDs', () => {
       expect(
-        areValidDids(['did:plc:abc123', 'did:plc:def456', 'did:web:example.com'])
+        areValidDids([
+          'did:plc:abc123',
+          'did:plc:def456',
+          'did:web:example.com',
+        ])
       ).toBe(true)
     })
 
     it('should reject arrays with invalid DIDs', () => {
-      expect(areValidDids(['did:plc:abc123', 'invalid', 'did:plc:def456'])).toBe(
-        false
-      )
+      expect(
+        areValidDids(['did:plc:abc123', 'invalid', 'did:plc:def456'])
+      ).toBe(false)
     })
 
     it('should return true for empty arrays', () => {
