@@ -15,8 +15,9 @@ export default function Home() {
 
         <div className="flex flex-col items-center gap-6 max-w-2xl">
           <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            Share posts at different visibility levels: from intimate circles to global reach.
-            Built on the decentralized AT Protocol, giving you control over your social experience.
+            Share posts at different visibility levels: from intimate circles to
+            global reach. Built on the decentralized AT Protocol, giving you
+            control over your social experience.
           </p>
 
           <div className="flex flex-col gap-3 text-base text-zinc-500 dark:text-zinc-500">
