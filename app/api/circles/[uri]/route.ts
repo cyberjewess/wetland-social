@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { AtpAgent } from '@atproto/api'
 import { getSession } from '@/lib/atproto/session'
+import { createAuthenticatedAgent } from '@/lib/atproto/client'
 import { createCircleService } from '@/lib/services/circleService'
 import { createLogger } from '@/lib/logger'
 
@@ -23,9 +23,7 @@ export async function GET(
     const { uri } = await params
     const decodedUri = decodeURIComponent(uri)
 
-    const agent = new AtpAgent({ service: process.env.NEXT_PUBLIC_PDS_URL || 'https://bsky.social' })
-    agent.session = session
-
+    const agent = await createAuthenticatedAgent(session)
     const circleService = createCircleService(agent)
     const circle = await circleService.getCircle(decodedUri)
 
@@ -61,9 +59,7 @@ export async function PUT(
     const decodedUri = decodeURIComponent(uri)
     const body = await request.json()
 
-    const agent = new AtpAgent({ service: process.env.NEXT_PUBLIC_PDS_URL || 'https://bsky.social' })
-    agent.session = session
-
+    const agent = await createAuthenticatedAgent(session)
     const circleService = createCircleService(agent)
     const circle = await circleService.updateCircle(decodedUri, body)
 
@@ -93,9 +89,7 @@ export async function DELETE(
     const { uri } = await params
     const decodedUri = decodeURIComponent(uri)
 
-    const agent = new AtpAgent({ service: process.env.NEXT_PUBLIC_PDS_URL || 'https://bsky.social' })
-    agent.session = session
-
+    const agent = await createAuthenticatedAgent(session)
     const circleService = createCircleService(agent)
     await circleService.deleteCircle(decodedUri)
 

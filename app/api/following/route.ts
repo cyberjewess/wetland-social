@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { AtpAgent } from '@atproto/api'
 import { getSession } from '@/lib/atproto/session'
+import { createAuthenticatedAgent } from '@/lib/atproto/client'
 import { createGraphRepository } from '@/lib/atproto/repositories/graphRepository'
 import { createLogger } from '@/lib/logger'
 
@@ -18,9 +18,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const agent = new AtpAgent({ service: process.env.NEXT_PUBLIC_PDS_URL || 'https://bsky.social' })
-    agent.session = session
-
+    const agent = await createAuthenticatedAgent(session)
     const graphRepository = createGraphRepository(agent)
     const profiles = await graphRepository.getAllFollowing(session.did)
 

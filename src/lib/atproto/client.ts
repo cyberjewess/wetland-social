@@ -26,3 +26,24 @@ export async function getProfile(actor: string) {
     throw err
   }
 }
+
+/**
+ * Create an authenticated AT Protocol agent from a session
+ */
+export async function createAuthenticatedAgent(session: {
+  did: string
+  handle: string
+  accessJwt: string
+  refreshJwt: string
+}): Promise<AtpAgent> {
+  const agent = new AtpAgent({ service: PDS_URL })
+  
+  await agent.resumeSession({
+    did: session.did,
+    handle: session.handle,
+    accessJwt: session.accessJwt,
+    refreshJwt: session.refreshJwt,
+  })
+  
+  return agent
+}
