@@ -27,7 +27,7 @@ export class CircleRepository {
       })
 
       return response.data.records.map((record) => ({
-        ...(record.value as WetlandCircle),
+        ...(record.value as unknown as WetlandCircle),
         uri: record.uri,
         cid: record.cid,
         owner: did,
@@ -64,7 +64,7 @@ export class CircleRepository {
       }
 
       return {
-        ...(response.data.value as WetlandCircle),
+        ...(response.data.value as unknown as WetlandCircle),
         uri: response.data.uri,
         cid: response.data.cid,
         owner: did,
