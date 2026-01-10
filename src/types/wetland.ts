@@ -44,7 +44,7 @@ export interface CircleRef {
 export interface WetlandPost {
   text: string // Max 300 graphemes
   level: PostLevel
-  circleRef?: string // AT-URI, required if level='circle'
+  circleRef?: CircleRef // Reference to circle (required if level='circle')
   createdAt: string // ISO datetime
   langs?: string[] // ISO 639-1 language codes
   facets?: RichTextFacet[] // Rich text facets (future use)

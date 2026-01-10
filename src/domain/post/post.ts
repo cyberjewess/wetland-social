@@ -18,12 +18,20 @@ import { type PostLevel, assertValidPostLevel } from './postLevel'
 export const MAX_POST_GRAPHEMES = 300
 
 /**
+ * Circle reference (AT-URI + CID for content addressing)
+ */
+export interface CircleRef {
+  uri: string // AT-URI of the circle record
+  cid: string // Content identifier for immutability verification
+}
+
+/**
  * Post entity
  */
 export interface Post {
   text: string
   level: PostLevel
-  circleRef?: string // AT-URI to circle record (required if level="circle")
+  circleRef?: CircleRef // Reference to circle record (required if level="circle")
   createdAt: string // ISO datetime
   langs?: string[] // Optional language codes (e.g., ['en', 'es'])
 }
@@ -68,7 +76,10 @@ export function validatePostText(text: string): void {
  * @param circleRef - Optional circle reference
  * @throws PostValidationError if invalid
  */
-export function validatePostLevel(level: PostLevel, circleRef?: string): void {
+export function validatePostLevel(
+  level: PostLevel,
+  circleRef?: CircleRef
+): void {
   try {
     assertValidPostLevel(level)
   } catch (err) {
@@ -81,6 +92,20 @@ export function validatePostLevel(level: PostLevel, circleRef?: string): void {
 
   if (level === 'global' && circleRef) {
     throw new PostValidationError('Global posts cannot have a circleRef')
+  }
+
+  // Validate circleRef structure if provided
+  if (circleRef) {
+    if (!circleRef.uri || typeof circleRef.uri !== 'string') {
+      throw new PostValidationError('circleRef.uri is required and must be a string')
+    }
+    if (!circleRef.cid || typeof circleRef.cid !== 'string') {
+      throw new PostValidationError('circleRef.cid is required and must be a string')
+    }
+    // Basic AT-URI format check
+    if (!circleRef.uri.startsWith('at://')) {
+      throw new PostValidationError('circleRef.uri must be a valid AT-URI (starts with at://)')
+    }
   }
 }
 
@@ -138,7 +163,7 @@ export function validatePost(post: Post): void {
 export function createPost(params: {
   text: string
   level: PostLevel
-  circleRef?: string
+  circleRef?: CircleRef
   langs?: string[]
 }): Post {
   const post: Post = {

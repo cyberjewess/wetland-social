@@ -54,7 +54,10 @@ describe('Post Domain', () => {
 
     it('should accept circle with circleRef', () => {
       expect(() =>
-        validatePostLevel('circle', 'at://did:plc:abc/app.wland.circle/123')
+        validatePostLevel('circle', {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        })
       ).not.toThrow()
     })
 
@@ -66,7 +69,10 @@ describe('Post Domain', () => {
 
     it('should reject global with circleRef', () => {
       expect(() =>
-        validatePostLevel('global', 'at://did:plc:abc/app.wland.circle/123')
+        validatePostLevel('global', {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        })
       ).toThrow('Global posts cannot have a circleRef')
     })
 
@@ -74,6 +80,33 @@ describe('Post Domain', () => {
       expect(() => validatePostLevel('invalid' as unknown as PostLevel)).toThrow(
         'Invalid post level'
       )
+    })
+
+    it('should reject circleRef without uri', () => {
+      expect(() =>
+        validatePostLevel('circle', {
+          uri: '',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        })
+      ).toThrow('circleRef.uri is required and must be a string')
+    })
+
+    it('should reject circleRef without cid', () => {
+      expect(() =>
+        validatePostLevel('circle', {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: '',
+        })
+      ).toThrow('circleRef.cid is required and must be a string')
+    })
+
+    it('should reject circleRef with invalid AT-URI format', () => {
+      expect(() =>
+        validatePostLevel('circle', {
+          uri: 'https://example.com/circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        })
+      ).toThrow('circleRef.uri must be a valid AT-URI (starts with at://)')
     })
   })
 
@@ -108,7 +141,10 @@ describe('Post Domain', () => {
       const post = {
         text: 'Hello circle',
         level: 'circle' as const,
-        circleRef: 'at://did:plc:abc/app.wland.circle/123',
+        circleRef: {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        },
         createdAt: new Date().toISOString(),
       }
       expect(() => validatePost(post)).not.toThrow()
@@ -164,12 +200,18 @@ describe('Post Domain', () => {
       const post = createPost({
         text: 'Hello circle',
         level: 'circle',
-        circleRef: 'at://did:plc:abc/app.wland.circle/123',
+        circleRef: {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        },
       })
 
       expect(post.text).toBe('Hello circle')
       expect(post.level).toBe('circle')
-      expect(post.circleRef).toBe('at://did:plc:abc/app.wland.circle/123')
+      expect(post.circleRef).toEqual({
+        uri: 'at://did:plc:abc/app.wland.circle/123',
+        cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+      })
     })
 
     it('should throw for invalid post', () => {
@@ -219,7 +261,10 @@ describe('Post Domain', () => {
       const circlePost = createPost({
         text: 'Circle post',
         level: 'circle',
-        circleRef: 'at://did:plc:abc/app.wland.circle/123',
+        circleRef: {
+          uri: 'at://did:plc:abc/app.wland.circle/123',
+          cid: 'bafyreib2rxk3rybk6hfs56gvqcgcn',
+        },
       })
 
       expect(getPostSummary(circlePost)).toContain('circle post:')

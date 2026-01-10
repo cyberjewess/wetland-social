@@ -22,8 +22,8 @@
             "description": "Visibility level of the post"
           },
           "circleRef": {
-            "type": "string",
-            "format": "at-uri",
+            "type": "ref",
+            "ref": "app.wland.defs#circleRef",
             "description": "Reference to circle (required if level='circle')"
           },
           "createdAt": {
