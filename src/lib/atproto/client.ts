@@ -51,8 +51,16 @@ export async function createAuthenticatedAgent(session: {
     if (oauthSession) {
       // Create an agent that uses the OAuth session's authenticated fetch
       // Wrap the OAuth fetchHandler to match the standard fetch signature
-      const wrappedFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+      const wrappedFetch = async (
+        input: RequestInfo | URL,
+        init?: RequestInit
+      ) => {
+        const url =
+          typeof input === 'string'
+            ? input
+            : input instanceof URL
+              ? input.toString()
+              : input.url
         return oauthSession.fetchHandler(url, init)
       }
 
@@ -63,10 +71,16 @@ export async function createAuthenticatedAgent(session: {
       return agent
     }
   } catch (err) {
-    logger.error({ error: err, did: session.did }, 'Failed to restore OAuth session')
+    logger.error(
+      { error: err, did: session.did },
+      'Failed to restore OAuth session'
+    )
   }
 
   // Fallback: create unauthenticated agent (will fail for authenticated operations)
-  logger.warn({ did: session.did }, 'No OAuth session found, creating unauthenticated agent')
+  logger.warn(
+    { did: session.did },
+    'No OAuth session found, creating unauthenticated agent'
+  )
   throw new Error('No valid OAuth session found')
 }

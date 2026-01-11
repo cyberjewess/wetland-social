@@ -26,7 +26,7 @@ export class CircleRepository {
         limit: 100, // Max 5 circles per user, but fetch more for safety
       })
 
-      return response.data.records.map((record) => ({
+      return response.data.records.map(record => ({
         ...(record.value as unknown as WetlandCircle),
         uri: record.uri,
         cid: record.cid,
@@ -201,7 +201,7 @@ export class CircleRepository {
       logger.debug({ ownerDid, memberDid }, 'Getting circles with member')
 
       const allCircles = await this.listCircles(ownerDid)
-      return allCircles.filter((circle) => circle.members.includes(memberDid))
+      return allCircles.filter(circle => circle.members.includes(memberDid))
     } catch (err) {
       logger.error(
         { error: err, ownerDid, memberDid },

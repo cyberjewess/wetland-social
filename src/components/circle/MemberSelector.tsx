@@ -9,7 +9,10 @@ interface MemberSelectorProps {
   onChange: (members: string[]) => void
 }
 
-export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProps) {
+export function MemberSelector({
+  selectedMembers,
+  onChange,
+}: MemberSelectorProps) {
   const { data: following, isLoading } = useFollowing()
   const [searchQuery, setSearchQuery] = useState('')
   const [manualDid, setManualDid] = useState('')
@@ -22,7 +25,7 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
 
     const query = searchQuery.toLowerCase()
     return following.filter(
-      (profile) =>
+      profile =>
         profile.handle.toLowerCase().includes(query) ||
         profile.displayName?.toLowerCase().includes(query) ||
         profile.did.toLowerCase().includes(query)
@@ -31,7 +34,7 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
 
   const handleToggleMember = (did: string) => {
     if (selectedMembers.includes(did)) {
-      onChange(selectedMembers.filter((m) => m !== did))
+      onChange(selectedMembers.filter(m => m !== did))
     } else {
       onChange([...selectedMembers, did])
     }
@@ -45,7 +48,9 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
     }
 
     if (!isValidDid(trimmed)) {
-      alert('Invalid DID format. DIDs must start with "did:" followed by method and identifier.')
+      alert(
+        'Invalid DID format. DIDs must start with "did:" followed by method and identifier.'
+      )
       return
     }
 
@@ -59,7 +64,7 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
   }
 
   const handleRemoveMember = (did: string) => {
-    onChange(selectedMembers.filter((m) => m !== did))
+    onChange(selectedMembers.filter(m => m !== did))
   }
 
   if (isLoading) {
@@ -79,8 +84,8 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
             Selected Members ({selectedMembers.length})
           </div>
           <div className="flex flex-wrap gap-2">
-            {selectedMembers.map((did) => {
-              const profile = following?.find((p) => p.did === did)
+            {selectedMembers.map(did => {
+              const profile = following?.find(p => p.did === did)
               return (
                 <div
                   key={did}
@@ -112,13 +117,13 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
           type="text"
           placeholder="Search by handle or name..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
         />
 
         {filteredFollowing && filteredFollowing.length > 0 && (
           <div className="mt-2 max-h-64 overflow-y-auto border border-zinc-300 dark:border-zinc-600 rounded-lg">
-            {filteredFollowing.map((profile) => {
+            {filteredFollowing.map(profile => {
               const isSelected = selectedMembers.includes(profile.did)
               return (
                 <button
@@ -159,7 +164,8 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
 
         {!following || following.length === 0 ? (
           <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 py-4 text-center">
-            You don't follow anyone on Bluesky yet. Add members manually by DID below.
+            You don't follow anyone on Bluesky yet. Add members manually by DID
+            below.
           </div>
         ) : null}
       </div>
@@ -174,7 +180,7 @@ export function MemberSelector({ selectedMembers, onChange }: MemberSelectorProp
             type="text"
             placeholder="did:plc:..."
             value={manualDid}
-            onChange={(e) => setManualDid(e.target.value)}
+            onChange={e => setManualDid(e.target.value)}
             className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           />
           <button

@@ -57,9 +57,7 @@ export function useCreateCircle() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (
-      circle: Omit<Circle, 'createdAt' | 'updatedAt'>
-    ) => {
+    mutationFn: async (circle: Omit<Circle, 'createdAt' | 'updatedAt'>) => {
       const response = await fetch('/api/circles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,7 +108,9 @@ export function useUpdateCircle() {
     onSuccess: (_, variables) => {
       // Invalidate both lists and the specific circle
       queryClient.invalidateQueries({ queryKey: circleKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: circleKeys.detail(variables.uri) })
+      queryClient.invalidateQueries({
+        queryKey: circleKeys.detail(variables.uri),
+      })
     },
   })
 }

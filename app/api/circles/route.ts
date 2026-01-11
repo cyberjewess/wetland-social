@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
     logger.error({ error: err }, 'Failed to create circle')
 
     // Check if it's a validation error
-    const message = err instanceof Error ? err.message : 'Failed to create circle'
+    const message =
+      err instanceof Error ? err.message : 'Failed to create circle'
 
     return NextResponse.json({ error: message }, { status: 400 })
   }

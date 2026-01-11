@@ -19,14 +19,19 @@ export default function CirclesPage() {
     try {
       await deleteCircle.mutateAsync(uri)
     } catch (err) {
-      alert('Failed to delete circle: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      alert(
+        'Failed to delete circle: ' +
+          (err instanceof Error ? err.message : 'Unknown error')
+      )
     }
   }
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-900">
-        <div className="text-zinc-600 dark:text-zinc-400">Loading circles...</div>
+        <div className="text-zinc-600 dark:text-zinc-400">
+          Loading circles...
+        </div>
       </div>
     )
   }
@@ -63,7 +68,7 @@ export default function CirclesPage() {
                 : 'bg-zinc-300 text-zinc-500 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-500'
             }`}
             aria-disabled={!canCreateMore}
-            onClick={(e) => !canCreateMore && e.preventDefault()}
+            onClick={e => !canCreateMore && e.preventDefault()}
           >
             + Create Circle
           </Link>
@@ -87,7 +92,7 @@ export default function CirclesPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {circles?.map((circle) => (
+            {circles?.map(circle => (
               <div
                 key={circle.uri}
                 className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6"
@@ -103,7 +108,8 @@ export default function CirclesPage() {
                       </p>
                     )}
                     <div className="mt-3 text-sm text-zinc-500 dark:text-zinc-500">
-                      {circle.members.length} {circle.members.length === 1 ? 'member' : 'members'}
+                      {circle.members.length}{' '}
+                      {circle.members.length === 1 ? 'member' : 'members'}
                     </div>
                   </div>
 

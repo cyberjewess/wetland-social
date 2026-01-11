@@ -7,7 +7,9 @@ import type { Circle } from '@/domain/circle/circle'
 export default function NewCirclePage() {
   const createCircle = useCreateCircle()
 
-  const handleCreate = async (data: Omit<Circle, 'createdAt' | 'updatedAt'>) => {
+  const handleCreate = async (
+    data: Omit<Circle, 'createdAt' | 'updatedAt'>
+  ) => {
     await createCircle.mutateAsync(data)
   }
 

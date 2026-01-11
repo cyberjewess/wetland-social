@@ -34,10 +34,7 @@ export async function GET(
     return NextResponse.json(circle)
   } catch (err) {
     logger.error({ error: err }, 'Failed to get circle')
-    return NextResponse.json(
-      { error: 'Failed to get circle' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to get circle' }, { status: 500 })
   }
 }
 
@@ -67,7 +64,8 @@ export async function PUT(
   } catch (err) {
     logger.error({ error: err }, 'Failed to update circle')
 
-    const message = err instanceof Error ? err.message : 'Failed to update circle'
+    const message =
+      err instanceof Error ? err.message : 'Failed to update circle'
     return NextResponse.json({ error: message }, { status: 400 })
   }
 }
@@ -97,7 +95,8 @@ export async function DELETE(
   } catch (err) {
     logger.error({ error: err }, 'Failed to delete circle')
 
-    const message = err instanceof Error ? err.message : 'Failed to delete circle'
+    const message =
+      err instanceof Error ? err.message : 'Failed to delete circle'
     return NextResponse.json({ error: message }, { status: 400 })
   }
 }

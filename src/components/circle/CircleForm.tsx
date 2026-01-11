@@ -93,7 +93,7 @@ export function CircleForm({
           type="text"
           id="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           placeholder="e.g., Close Friends, Work Team"
           maxLength={60} // Slightly more than grapheme limit for safety
           className={`w-full px-4 py-2 rounded-lg border ${
@@ -103,7 +103,9 @@ export function CircleForm({
           } bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent`}
         />
         <div className="flex justify-between mt-1">
-          <div className="text-sm text-red-600 dark:text-red-400">{nameError || '\u00A0'}</div>
+          <div className="text-sm text-red-600 dark:text-red-400">
+            {nameError || '\u00A0'}
+          </div>
           <div
             className={`text-sm ${
               nameGraphemes > MAX_CIRCLE_NAME_GRAPHEMES
@@ -127,7 +129,7 @@ export function CircleForm({
         <textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={e => setDescription(e.target.value)}
           placeholder="What is this circle for?"
           rows={3}
           maxLength={220}
@@ -156,8 +158,12 @@ export function CircleForm({
       {/* Member selector */}
       <div>
         <div className="mb-2">
-          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Members</span>
-          <span className="text-sm text-zinc-600 dark:text-zinc-400 ml-2">(optional)</span>
+          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+            Members
+          </span>
+          <span className="text-sm text-zinc-600 dark:text-zinc-400 ml-2">
+            (optional)
+          </span>
         </div>
         <MemberSelector selectedMembers={members} onChange={setMembers} />
       </div>

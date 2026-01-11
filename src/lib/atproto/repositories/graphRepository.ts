@@ -33,7 +33,7 @@ export class GraphRepository {
         cursor,
       })
 
-      const profiles: ProfileInfo[] = response.data.follows.map((follow) => ({
+      const profiles: ProfileInfo[] = response.data.follows.map(follow => ({
         did: follow.did,
         handle: follow.handle,
         displayName: follow.displayName,
@@ -72,7 +72,10 @@ export class GraphRepository {
         cursor = result.cursor
       } while (cursor)
 
-      logger.info({ did, totalCount: allProfiles.length }, 'Retrieved all following')
+      logger.info(
+        { did, totalCount: allProfiles.length },
+        'Retrieved all following'
+      )
 
       return allProfiles
     } catch (err) {
@@ -93,7 +96,7 @@ export class GraphRepository {
         limit: 25,
       })
 
-      const profiles: ProfileInfo[] = response.data.actors.map((actor) => ({
+      const profiles: ProfileInfo[] = response.data.actors.map(actor => ({
         did: actor.did,
         handle: actor.handle,
         displayName: actor.displayName,
