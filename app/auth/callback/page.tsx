@@ -31,7 +31,7 @@ function CallbackContent() {
           throw new Error(data.error || 'Failed to complete authentication')
         }
 
-        router.push('/feed/global')
+        router.push('/circles')
       } catch (err) {
         console.error('Authentication failed:', err)
         setError(

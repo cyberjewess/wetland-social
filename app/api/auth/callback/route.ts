@@ -49,13 +49,14 @@ export async function POST(request: NextRequest) {
     const profileData = await profileResponse.json()
     const handle = profileData.handle
 
-    const tokenInfo = await session.getTokenInfo()
-
+    // Note: OAuth client manages tokens internally
+    // We store the DID and handle for session management
+    // The actual API calls will use the OAuth client's authenticated agent
     await setSession({
       did,
       handle,
-      accessJwt: tokenInfo.sub, // Store the DID as access identifier
-      refreshJwt: '', // OAuth client handles refresh automatically
+      accessJwt: did, // Placeholder - OAuth client handles actual tokens
+      refreshJwt: '', // OAuth client handles refresh
     })
 
     logger.info({ did, handle }, 'User authenticated successfully')
