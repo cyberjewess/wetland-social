@@ -164,7 +164,7 @@ export function MemberSelector({
 
         {!following || following.length === 0 ? (
           <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 py-4 text-center">
-            You don't follow anyone on Bluesky yet. Add members manually by DID
+            You dont follow anyone on Bluesky yet. Add members manually by DID
             below.
           </div>
         ) : null}
